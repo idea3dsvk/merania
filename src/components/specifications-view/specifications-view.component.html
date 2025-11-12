@@ -1,0 +1,133 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="mb-6">
+    <h1 class="text-3xl font-bold text-gray-900">{{ 'specifications.title' | translate }}</h1>
+    <p class="mt-2 text-sm text-gray-600">{{ 'specifications.description' | translate }}</p>
+  </div>
+
+  <!-- Specifications Grid -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    @for (type of measurementTypes; track type) {
+      @let spec = specificationsService.getSpecificationForType(type);
+      <div class="bg-white shadow-md rounded-lg overflow-hidden border border-gray-200">
+        <div class="px-6 py-4 bg-gradient-to-r from-indigo-500 to-indigo-600">
+          <h3 class="text-lg font-semibold text-white">{{ getMeasurementTypeName(type) }}</h3>
+        </div>
+        
+        <div class="px-6 py-4">
+          @if (spec) {
+            <div class="space-y-3">
+              <div>
+                <span class="text-xs font-semibold text-gray-500 uppercase">{{ 'specifications.isoStandard' | translate }}</span>
+                <p class="mt-1 text-sm font-medium text-indigo-600">{{ spec.isoStandard }}</p>
+              </div>
+              
+              <div>
+                <span class="text-xs font-semibold text-gray-500 uppercase">{{ 'specifications.standardTitle' | translate }}</span>
+                <p class="mt-1 text-sm text-gray-800">{{ spec.standardTitle }}</p>
+              </div>
+              
+              <div>
+                <span class="text-xs font-semibold text-gray-500 uppercase">{{ 'specifications.description' | translate }}</span>
+                <p class="mt-1 text-sm text-gray-700">{{ spec.description }}</p>
+              </div>
+              
+              <div>
+                <span class="text-xs font-semibold text-gray-500 uppercase">{{ 'specifications.requirements' | translate }}</span>
+                <p class="mt-1 text-sm text-gray-700 font-medium">{{ spec.requirements }}</p>
+              </div>
+              
+              @if (spec.testingProcedure) {
+                <div>
+                  <span class="text-xs font-semibold text-gray-500 uppercase">{{ 'specifications.testingProcedure' | translate }}</span>
+                  <p class="mt-1 text-sm text-gray-700">{{ spec.testingProcedure }}</p>
+                </div>
+              }
+              
+              @if (spec.referenceDocument) {
+                <div>
+                  <span class="text-xs font-semibold text-gray-500 uppercase">{{ 'specifications.referenceDocument' | translate }}</span>
+                  <p class="mt-1 text-sm text-gray-700">{{ spec.referenceDocument }}</p>
+                </div>
+              }
+              
+              <div class="pt-2 border-t border-gray-200">
+                <span class="text-xs text-gray-500">{{ 'specifications.lastUpdated' | translate }}: {{ spec.lastUpdated | date:'short' }}</span>
+              </div>
+            </div>
+          } @else {
+            <p class="text-sm text-gray-500 italic">{{ 'specifications.noSpecification' | translate }}</p>
+          }
+        </div>
+        
+        <div class="px-6 py-3 bg-gray-50 border-t border-gray-200 flex justify-end space-x-2">
+          <button (click)="openEditModal(type)" class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+            @if (spec) {
+              {{ 'specifications.edit' | translate }}
+            } @else {
+              {{ 'specifications.add' | translate }}
+            }
+          </button>
+          @if (spec) {
+            <button (click)="deleteSpecification(type)" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+              {{ 'specifications.delete' | translate }}
+            </button>
+          }
+        </div>
+      </div>
+    }
+  </div>
+</div>
+
+<!-- Edit Modal -->
+@if (showEditModal()) {
+  <div class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50" (click)="closeEditModal()">
+    <div class="bg-white rounded-lg shadow-xl max-w-3xl w-full mx-4 max-h-[90vh] overflow-y-auto" (click)="$event.stopPropagation()">
+      <div class="px-6 py-4 border-b border-gray-200">
+        <h3 class="text-lg font-medium text-gray-900">
+          {{ 'specifications.editTitle' | translate }}: {{ getMeasurementTypeName(selectedType()!) }}
+        </h3>
+      </div>
+
+      <form [formGroup]="editForm" (ngSubmit)="onSubmit()" class="p-6 space-y-4">
+        <div>
+          <label for="isoStandard" class="block text-sm font-medium text-gray-700">{{ 'specifications.isoStandard' | translate }} *</label>
+          <input type="text" id="isoStandard" formControlName="isoStandard" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="ISO 14644-1">
+        </div>
+
+        <div>
+          <label for="standardTitle" class="block text-sm font-medium text-gray-700">{{ 'specifications.standardTitle' | translate }} *</label>
+          <input type="text" id="standardTitle" formControlName="standardTitle" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="Classification of air cleanliness">
+        </div>
+
+        <div>
+          <label for="description" class="block text-sm font-medium text-gray-700">{{ 'specifications.description' | translate }} *</label>
+          <textarea id="description" formControlName="description" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></textarea>
+        </div>
+
+        <div>
+          <label for="requirements" class="block text-sm font-medium text-gray-700">{{ 'specifications.requirements' | translate }} *</label>
+          <textarea id="requirements" formControlName="requirements" rows="2" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></textarea>
+        </div>
+
+        <div>
+          <label for="testingProcedure" class="block text-sm font-medium text-gray-700">{{ 'specifications.testingProcedure' | translate }}</label>
+          <textarea id="testingProcedure" formControlName="testingProcedure" rows="2" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></textarea>
+        </div>
+
+        <div>
+          <label for="referenceDocument" class="block text-sm font-medium text-gray-700">{{ 'specifications.referenceDocument' | translate }}</label>
+          <input type="text" id="referenceDocument" formControlName="referenceDocument" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="ISO 14644-1:2015">
+        </div>
+
+        <div class="flex justify-end space-x-3 pt-4 border-t mt-6">
+          <button type="button" (click)="closeEditModal()" class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+            {{ 'form.cancel' | translate }}
+          </button>
+          <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" [disabled]="editForm.invalid">
+            {{ 'form.save' | translate }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

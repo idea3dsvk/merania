@@ -1,0 +1,5 @@
+{
+  "name": "Workplace Condition Monitor",
+  "description": "An application to log, monitor, and analyze various workplace measurements including environmental conditions (temperature, luminosity, dustiness), equipment torque, electrical resistance, and ionizer performance. Features data visualization, history tracking, and exporting capabilities.",
+  "requestFramePermissions": []
+}

@@ -1,0 +1,111 @@
+<div class="bg-white rounded-lg shadow-md p-6">
+  <h2 class="text-2xl font-bold text-gray-800 mb-6">Statistics & Summary Report</h2>
+  
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <!-- Total Measurements -->
+    <div class="bg-blue-50 rounded-lg p-4">
+      <div class="text-sm text-blue-600 font-medium">Total Measurements</div>
+      <div class="text-3xl font-bold text-blue-900 mt-2">
+        {{ statisticsService.statistics().totalMeasurements }}
+      </div>
+    </div>
+
+    <!-- Out of Spec -->
+    <div class="bg-red-50 rounded-lg p-4">
+      <div class="text-sm text-red-600 font-medium">Out of Spec</div>
+      <div class="text-3xl font-bold text-red-900 mt-2">
+        {{ statisticsService.statistics().outOfSpecCount }}
+      </div>
+      <div class="text-xs text-red-600 mt-1">
+        {{ statisticsService.statistics().outOfSpecPercentage.toFixed(1) }}%
+      </div>
+    </div>
+
+    <!-- In Spec -->
+    <div class="bg-green-50 rounded-lg p-4">
+      <div class="text-sm text-green-600 font-medium">In Spec</div>
+      <div class="text-3xl font-bold text-green-900 mt-2">
+        {{ statisticsService.statistics().totalMeasurements - statisticsService.statistics().outOfSpecCount }}
+      </div>
+      <div class="text-xs text-green-600 mt-1">
+        {{ (100 - statisticsService.statistics().outOfSpecPercentage).toFixed(1) }}%
+      </div>
+    </div>
+
+    <!-- Locations -->
+    <div class="bg-purple-50 rounded-lg p-4">
+      <div class="text-sm text-purple-600 font-medium">Locations</div>
+      <div class="text-3xl font-bold text-purple-900 mt-2">
+        {{ statisticsService.statistics().measurementsByLocation.size }}
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Measurements by Type -->
+    <div class="border rounded-lg p-4">
+      <h3 class="text-lg font-semibold text-gray-800 mb-4">Measurements by Type</h3>
+      <div class="space-y-3">
+        @for (entry of getTypeEntries(); track entry[0]) {
+          <div class="flex items-center justify-between">
+            <span class="text-sm text-gray-600">
+              {{ 'measurementNames.' + entry[0] | translate }}
+            </span>
+            <div class="flex items-center gap-2">
+              <div class="w-32 bg-gray-200 rounded-full h-2">
+                <div 
+                  class="bg-indigo-600 h-2 rounded-full"
+                  [style.width.%]="(entry[1] / statisticsService.statistics().totalMeasurements) * 100"
+                ></div>
+              </div>
+              <span class="text-sm font-semibold text-gray-900 w-8 text-right">{{ entry[1] }}</span>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Top Locations -->
+    <div class="border rounded-lg p-4">
+      <h3 class="text-lg font-semibold text-gray-800 mb-4">Top 5 Locations</h3>
+      <div class="space-y-3">
+        @for (entry of getLocationEntries(); track entry[0]) {
+          <div class="flex items-center justify-between">
+            <span class="text-sm text-gray-600 truncate flex-1 mr-2">{{ entry[0] }}</span>
+            <div class="flex items-center gap-2">
+              <div class="w-24 bg-gray-200 rounded-full h-2">
+                <div 
+                  class="bg-green-600 h-2 rounded-full"
+                  [style.width.%]="(entry[1] / statisticsService.statistics().totalMeasurements) * 100"
+                ></div>
+              </div>
+              <span class="text-sm font-semibold text-gray-900 w-8 text-right">{{ entry[1] }}</span>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Trends -->
+  <div class="mt-6 border rounded-lg p-4">
+    <h3 class="text-lg font-semibold text-gray-800 mb-4">Recent Trends</h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      @for (trend of statisticsService.statistics().recentTrends; track trend.type) {
+        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+          <div class="flex-1">
+            <div class="text-sm font-medium text-gray-900">
+              {{ 'measurementNames.' + trend.type | translate }}
+            </div>
+            <div class="text-xs text-gray-500 mt-1">
+              {{ trend.changePercent > 0 ? '+' : '' }}{{ trend.changePercent.toFixed(1) }}%
+            </div>
+          </div>
+          <div [class]="'text-2xl font-bold ' + getTrendColor(trend.trend)">
+            {{ getTrendIcon(trend.trend) }}
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</div>

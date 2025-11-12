@@ -1,0 +1,26 @@
+<div 
+  class="fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none" 
+  role="region" 
+  aria-live="polite" 
+  aria-atomic="true"
+  aria-label="Notifications"
+>
+  @for (toast of toastService.toasts(); track toast.id) {
+    <div 
+      @toastAnimation
+      [class]="'pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg min-w-[300px] max-w-md ' + getColorClasses(toast.type)"
+      role="alert"
+      [attr.aria-label]="toast.type + ' notification'"
+    >
+      <span class="text-xl font-bold">{{ getIcon(toast.type) }}</span>
+      <span class="flex-1">{{ toast.message }}</span>
+      <button 
+        (click)="close(toast.id)"
+        class="ml-2 hover:opacity-75 text-xl leading-none"
+        aria-label="Close"
+      >
+        ×
+      </button>
+    </div>
+  }
+</div>

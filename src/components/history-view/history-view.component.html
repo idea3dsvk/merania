@@ -1,0 +1,236 @@
+<div class="space-y-6">
+  <!-- Charts Section -->
+  @if (filterType() !== 'all') {
+    <div class="grid grid-cols-1 gap-6">
+      <app-measurement-chart 
+        [measurements]="dataService.measurements()"
+        [measurementType]="filterType()"
+      />
+    </div>
+  } @else {
+    <!-- Show all charts when 'all' is selected -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      @for (type of measurementTypes; track type) {
+        <app-measurement-chart 
+          [measurements]="dataService.measurements()"
+          [measurementType]="type"
+        />
+      }
+    </div>
+  }
+
+  <!-- Filters and Actions -->
+  <div class="bg-white p-4 rounded-lg shadow-md">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end mb-4">
+      <div>
+        <label for="filter-type" class="block text-sm font-medium text-gray-700">{{ 'history.measurementType' | translate }}</label>
+        <select id="filter-type" [ngModel]="filterType()" (change)="setFilterType($event)" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+          <option value="all">{{ 'history.allTypes' | translate }}</option>
+          @for (type of measurementTypes; track type) {
+            <option [value]="type">{{ 'measurementNames.' + type | translate }}</option>
+          }
+        </select>
+      </div>
+      <div>
+        <label for="filter-location" class="block text-sm font-medium text-gray-700">{{ 'history.location' | translate }}</label>
+        <input type="text" id="filter-location" [ngModel]="filterLocation()" (input)="setFilterLocation($event)" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" [placeholder]="'history.filterByLocation' | translate">
+      </div>
+      <div>
+        <label for="filter-notes" class="block text-sm font-medium text-gray-700">Search Notes</label>
+        <input type="text" id="filter-notes" [ngModel]="filterNotes()" (input)="setFilterNotes($event)" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="Search in notes...">
+      </div>
+      <div class="flex justify-end space-x-2">
+        <button (click)="exportCSV()" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+          {{ 'history.exportCSV' | translate }}
+        </button>
+        <button (click)="exportPDF()" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+          {{ 'history.exportPDF' | translate }}
+        </button>
+      </div>
+    </div>
+    
+    <!-- Date Filters -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
+      <div>
+        <label for="filter-year" class="block text-sm font-medium text-gray-700">{{ 'history.filterYear' | translate }}</label>
+        <select id="filter-year" [ngModel]="filterYear()" (change)="setFilterYear($event)" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+          <option value="all">{{ 'history.allYears' | translate }}</option>
+          @for (year of availableYears(); track year) {
+            <option [value]="year">{{ year }}</option>
+          }
+        </select>
+      </div>
+      <div>
+        <label for="filter-month" class="block text-sm font-medium text-gray-700">{{ 'history.filterMonth' | translate }}</label>
+        <select id="filter-month" [ngModel]="filterMonth()" (change)="setFilterMonth($event)" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+          <option value="all">{{ 'history.allMonths' | translate }}</option>
+          @for (month of availableMonths; track month) {
+            <option [value]="month">{{ getMonthName(month) }}</option>
+          }
+        </select>
+      </div>
+      <div>
+        <label for="filter-date-from" class="block text-sm font-medium text-gray-700">{{ 'history.dateFrom' | translate }}</label>
+        <input type="date" id="filter-date-from" [ngModel]="filterDateFrom()" (input)="setFilterDateFrom($event)" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+      </div>
+      <div>
+        <label for="filter-date-to" class="block text-sm font-medium text-gray-700">{{ 'history.dateTo' | translate }}</label>
+        <input type="date" id="filter-date-to" [ngModel]="filterDateTo()" (input)="setFilterDateTo($event)" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+      </div>
+    </div>
+  </div>
+
+  <!-- Data Table -->
+  <div class="bg-white shadow-md rounded-lg overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ 'history.table.date' | translate }}</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ 'history.table.type' | translate }}</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ 'history.table.location' | translate }}</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ 'history.table.deviceId' | translate }}</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ 'history.table.details' | translate }}</th>
+            <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">{{ 'history.table.trend' | translate }}</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ 'history.table.notes' | translate }}</th>
+            <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          @for (item of filteredMeasurements(); track item.id) {
+            <tr class="hover:bg-gray-50">
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{{ item.date | localeDate:'short' }}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                  {{ 'measurementNames.' + item.type | translate }}
+                </span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{{ item.location }}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                @if (item.deviceId) {
+                  <span class="font-mono text-xs bg-gray-100 px-2 py-1 rounded">{{ item.deviceId }}</span>
+                } @else {
+                  <span class="text-gray-400">-</span>
+                }
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                @switch (item.type) {
+                  @case ('temperature_humidity') {
+                    <span>{{ 'history.detailsPrefix.temp' | translate }}: {{ item.temperature | localeNumber:1 }}°C ({{item.limits.temperatureMin | localeNumber:0}}-{{item.limits.temperatureMax | localeNumber:0}}), </span>
+                    <span>{{ 'history.detailsPrefix.hum' | translate }}: {{ item.humidity | localeNumber:1 }}% ({{item.limits.humidityMin | localeNumber:0}}-{{item.limits.humidityMax | localeNumber:0}})</span>
+                  }
+                  @case ('luminosity') { {{ 'history.detailsPrefix.lux' | translate }}: {{ item.luminosity | localeNumber:0 }}/{{item.limit | localeNumber:0}}lx }
+                  @case ('dustiness_iso6') { 
+                    0.5µm: {{ item.particles_0_5um | localeNumber:0 }} ({{item.limits.particles_0_5um_min | localeNumber:0}}-{{item.limits.particles_0_5um_max | localeNumber:0}}), 
+                    5µm: {{ item.particles_5um | localeNumber:0 }} ({{item.limits.particles_5um_min | localeNumber:0}}-{{item.limits.particles_5um_max | localeNumber:0}})
+                  }
+                  @case ('dustiness_iso5') { 
+                    0.5µm: {{ item.particles_0_5um | localeNumber:0 }} ({{item.limits.particles_0_5um_min | localeNumber:0}}-{{item.limits.particles_0_5um_max | localeNumber:0}}), 
+                    5µm: {{ item.particles_5um | localeNumber:0 }} ({{item.limits.particles_5um_min | localeNumber:0}}-{{item.limits.particles_5um_max | localeNumber:0}})
+                  }
+                  @case ('torque') { {{ 'history.detailsPrefix.val' | translate }}: {{ item.torqueValue | localeNumber:1 }}Nm, {{ 'history.detailsPrefix.limit' | translate }}: {{item.limit | localeNumber:1}}Nm }
+                  @case ('surface_resistance') { {{ 'history.detailsPrefix.r' | translate }}: {{ item.resistance.toExponential(1) }}Ω, {{ 'history.detailsPrefix.limit' | translate }}: {{item.limit.toExponential(1)}}Ω }
+                  @case ('grounding_resistance') { {{ 'history.detailsPrefix.r' | translate }}: {{ item.resistance | localeNumber:2 }}Ω, {{ 'history.detailsPrefix.limit' | translate }}: {{item.limit | localeNumber:2}}Ω }
+                  @case ('ionizer') { {{ 'history.detailsPrefix.bal' | translate }}: {{ item.balance | localeNumber:1 }}V, {{ 'history.detailsPrefix.dPositive' | translate }}: {{item.decayTimePositive | localeNumber:1}}s }
+                }
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-center">
+                @if (item.trend) {
+                  @switch (item.trend) {
+                    @case ('up') {
+                      <!-- Up arrow, red for increase -->
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500 inline-block" viewBox="0 0 20 20" fill="currentColor" aria-label="Trending up">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13a1 1 0 102 0V9.414l1.293 1.293a1 1 0 001.414-1.414z" clip-rule="evenodd" />
+                      </svg>
+                    }
+                    @case ('down') {
+                      <!-- Down arrow, green for decrease -->
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-500 inline-block" viewBox="0 0 20 20" fill="currentColor" aria-label="Trending down">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v3.586L7.707 9.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 10.586V7z" clip-rule="evenodd" />
+                      </svg>
+                    }
+                    @case ('stable') {
+                      <!-- Stable icon -->
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 inline-block" viewBox="0 0 20 20" fill="currentColor" aria-label="Stable">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9a1 1 0 000 2h6a1 1 0 100-2H7z" clip-rule="evenodd" />
+                      </svg>
+                    }
+                  }
+                } @else {
+                  <span class="text-gray-400">-</span>
+                }
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 max-w-xs truncate">{{ item.notes }}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+                <button 
+                  (click)="openEditModal(item)" 
+                  class="text-indigo-600 hover:text-indigo-900 mr-3"
+                  title="Edit"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                  </svg>
+                </button>
+                @if (canDelete()) {
+                  <button 
+                    (click)="openDeleteConfirm(item.id)" 
+                    class="text-red-600 hover:text-red-900"
+                    title="Delete"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                    </svg>
+                  </button>
+                } @else {
+                  <span class="text-gray-400 cursor-not-allowed" title="Only admin can delete">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                    </svg>
+                  </span>
+                }
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="7" class="px-6 py-12 text-center text-sm text-gray-500">
+                {{ 'history.noRecords' | translate }}
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Edit Modal -->
+  @if (showEditModal() && editingMeasurement()) {
+    <div class="fixed inset-0 z-50 overflow-y-auto">
+      <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" (click)="closeEditModal()"></div>
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
+          <div class="bg-white px-4 pt-5 pb-4 sm:p-6">
+            <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">
+              Edit {{ 'measurementNames.' + editingMeasurement()!.type | translate }}
+            </h3>
+            <app-measurement-form
+              [measurementType]="editingMeasurement()!.type"
+              [existingMeasurement]="editingMeasurement()"
+              (formSubmitted)="handleEditSubmit($event)"
+              (formCancelled)="closeEditModal()"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Delete Confirmation Dialog -->
+  <app-confirm-dialog
+    [title]="translationService.translate('confirm.deleteTitle')"
+    [message]="translationService.translate('confirm.deleteMessage')"
+    [show]="showDeleteConfirm()"
+    (confirmed)="confirmDelete()"
+    (cancelled)="closeDeleteConfirm()"
+  />
+</div>

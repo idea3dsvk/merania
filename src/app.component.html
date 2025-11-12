@@ -1,0 +1,139 @@
+<!-- Login Screen -->
+@if (!isAuthenticated()) {
+  <app-login (loginSuccess)="onLoginSuccess()"></app-login>
+}
+
+<!-- Main Application (only shown when authenticated) -->
+@if (isAuthenticated()) {
+<div class="flex h-screen bg-gray-100 font-sans">
+  <!-- Sidebar -->
+  <aside class="w-64 flex-shrink-0 bg-gray-800 text-white flex flex-col" role="navigation" aria-label="Main navigation">
+    <div class="h-16 flex items-center justify-center bg-gray-900 shadow-md">
+      <span class="text-xl font-bold tracking-wider">WCM</span>
+      <span class="ml-2 text-sm text-gray-400">v1.0</span>
+    </div>
+    <nav class="flex-1 px-2 py-4 space-y-2" aria-label="Primary navigation">
+      <a
+        href="javascript:void(0)"
+        (click)="setView('dashboard')"
+        [class.bg-gray-700]="activeView() === 'dashboard'"
+        class="flex items-center px-4 py-2 rounded-md hover:bg-gray-700 transition-colors duration-200"
+        role="button"
+        [attr.aria-current]="activeView() === 'dashboard' ? 'page' : null"
+        aria-label="Navigate to Dashboard"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" viewBox="0 0 20 20" fill="currentColor">
+          <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+        </svg>
+        {{ 'sidebar.dashboard' | translate }}
+      </a>
+      <a
+        href="javascript:void(0)"
+        (click)="setView('history')"
+        [class.bg-gray-700]="activeView() === 'history'"
+        class="flex items-center px-4 py-2 rounded-md hover:bg-gray-700 transition-colors duration-200"
+        role="button"
+        [attr.aria-current]="activeView() === 'history' ? 'page' : null"
+        aria-label="Navigate to History and Trends"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.898 2.162l-1.5-1.5a1 1 0 111.414-1.414l4.5 4.5a1 1 0 010 1.414l-4.5 4.5a1 1 0 01-1.414-1.414l1.5-1.5A7.002 7.002 0 015.5 15.899V18a1 1 0 11-2 0V5a1 1 0 011-1zm6 10a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
+        </svg>
+        {{ 'sidebar.history' | translate }}
+      </a>
+      <a
+        href="javascript:void(0)"
+        (click)="setView('statistics')"
+        [class.bg-gray-700]="activeView() === 'statistics'"
+        class="flex items-center px-4 py-2 rounded-md hover:bg-gray-700 transition-colors duration-200"
+        role="button"
+        [attr.aria-current]="activeView() === 'statistics' ? 'page' : null"
+        aria-label="Navigate to Statistics"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" viewBox="0 0 20 20" fill="currentColor">
+          <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
+        </svg>
+        {{ 'sidebar.statistics' | translate }}
+      </a>
+      <a
+        href="javascript:void(0)"
+        (click)="setView('specifications')"
+        [class.bg-gray-700]="activeView() === 'specifications'"
+        class="flex items-center px-4 py-2 rounded-md hover:bg-gray-700 transition-colors duration-200"
+        role="button"
+        [attr.aria-current]="activeView() === 'specifications' ? 'page' : null"
+        aria-label="Navigate to Specifications"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd" />
+        </svg>
+        {{ 'sidebar.specifications' | translate }}
+      </a>
+    </nav>
+  </aside>
+
+  <!-- Main content -->
+  <main class="flex-1 flex flex-col overflow-hidden">
+    <header class="h-16 bg-white border-b border-gray-200 flex items-center px-6 justify-between" role="banner">
+      <h1 class="text-2xl font-semibold text-gray-800">
+        {{ 'header.' + activeView() | translate }}
+      </h1>
+      <div class="flex items-center gap-4">
+        <!-- User info -->
+        <div class="flex items-center gap-2 text-sm text-gray-600">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+          </svg>
+          <span class="font-medium">{{ currentUser()?.username }}</span>
+          <span class="px-2 py-1 text-xs rounded-full" [class.bg-red-100]="currentUser()?.role === 'admin'" [class.text-red-800]="currentUser()?.role === 'admin'" [class.bg-blue-100]="currentUser()?.role === 'moderator'" [class.text-blue-800]="currentUser()?.role === 'moderator'">
+            {{ 'login.' + currentUser()?.role | translate }}
+          </span>
+        </div>
+        
+        <!-- Logout button -->
+        <button 
+          (click)="onLogout()"
+          class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 transition-colors"
+        >
+          {{ 'login.logout' | translate }}
+        </button>
+        
+        <!-- Language selector -->
+        <div>
+          <label for="language-select" class="sr-only">Select Language</label>
+          <select 
+            id="language-select"
+            (change)="setLanguage($event)" 
+            [value]="translationService.currentLang()" 
+            class="mt-1 block pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+            aria-label="Language selection"
+          >
+            <option value="en">English</option>
+            <option value="sk">Slovenčina</option>
+            <option value="de">Deutsch</option>
+          </select>
+        </div>
+      </div>
+    </header>
+    <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6" role="main" aria-label="Main content">
+      @switch (activeView()) {
+        @case ('dashboard') {
+          <app-dashboard></app-dashboard>
+        }
+        @case ('history') {
+          <app-history-view></app-history-view>
+        }
+        @case ('statistics') {
+          <app-statistics></app-statistics>
+        }
+        @case ('specifications') {
+          <app-specifications-view></app-specifications-view>
+        }
+      }
+    </main>
+  </main>
+</div>
+}
+
+<!-- Toast Notifications -->
+<app-toast></app-toast>

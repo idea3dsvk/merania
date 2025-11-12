@@ -1,0 +1,13 @@
+<div class="bg-white rounded-lg shadow p-4">
+  <h3 class="text-lg font-semibold mb-4">
+    {{ 'measurementNames.' + measurementType() | translate }}
+  </h3>
+  <div class="h-[300px]">
+    <canvas 
+      baseChart
+      [data]="chartData()"
+      [type]="lineChartType"
+      [options]="chartOptions()"
+    ></canvas>
+  </div>
+</div>
