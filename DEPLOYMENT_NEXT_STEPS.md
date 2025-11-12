@@ -1,4 +1,4 @@
-# 🎉 Aplikácia je pripravená na deployment!
+# 🎉 Aplikácia je NASADENÁ na GitHub!
 
 ## ✅ Dokončené kroky:
 
@@ -6,6 +6,8 @@
 2. ✅ Vytvorený produkčný build (`dist/` adresár)
 3. ✅ Inicializovaný Git repozitár
 4. ✅ Vytvorený prvý commit
+5. ✅ Pripojený remote repozitár: https://github.com/idea3dsvk/merania
+6. ✅ Kód úspešne pushnutý na GitHub (main branch)
 
 ## 🚀 Nasledujúce kroky na deployment:
 

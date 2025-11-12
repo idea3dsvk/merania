@@ -1,15 +1,48 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, inject } from '@angular/core';
 import { ISOSpecification, MeasurementType } from '../models';
+import { FirebaseService } from './firebase.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class SpecificationsService {
+  private firebaseService = inject(FirebaseService);
   private readonly STORAGE_KEY = 'iso-specifications';
+  private readonly COLLECTION_NAME = 'specifications';
   
   private _specifications = signal<ISOSpecification[]>(this.loadFromStorage());
   
   public readonly specifications = this._specifications.asReadonly();
+
+  constructor() {
+    this.initializeFirebaseSync();
+  }
+
+  private async initializeFirebaseSync(): Promise<void> {
+    if (!this.firebaseService.isFirebaseAvailable()) {
+      console.log('Firebase not available for specifications, using localStorage only');
+      return;
+    }
+
+    try {
+      // Load specifications from Firebase
+      const firebaseData = await this.firebaseService.getCollection(this.COLLECTION_NAME);
+      if (firebaseData.length > 0) {
+        console.log('Loaded specifications from Firebase:', firebaseData.length);
+        this._specifications.set(firebaseData as ISOSpecification[]);
+        this.saveToStorage(firebaseData as ISOSpecification[]);
+      } else {
+        // Sync default specifications to Firebase
+        const defaults = this.loadFromStorage();
+        for (const spec of defaults) {
+          await this.firebaseService.saveDocument(this.COLLECTION_NAME, spec.measurementType, spec);
+        }
+        console.log('Synced default specifications to Firebase');
+      }
+    } catch (error) {
+      console.error('Firebase specifications initialization error:', error);
+    }
+  }
 
   private loadFromStorage(): ISOSpecification[] {
     try {
@@ -94,47 +127,75 @@ export class SpecificationsService {
     return this._specifications().find(spec => spec.measurementType === type);
   }
 
-  addSpecification(spec: Omit<ISOSpecification, 'lastUpdated'>): void {
+  async addSpecification(spec: Omit<ISOSpecification, 'lastUpdated'>): Promise<void> {
+    const newSpec: ISOSpecification = {
+      ...spec,
+      lastUpdated: new Date().toISOString(),
+    };
+    
     this._specifications.update(current => {
-      const newSpec: ISOSpecification = {
-        ...spec,
-        lastUpdated: new Date().toISOString(),
-      };
       const updated = [...current, newSpec];
       this.saveToStorage(updated);
       return updated;
     });
+
+    // Sync to Firebase
+    if (this.firebaseService.isFirebaseAvailable()) {
+      try {
+        await this.firebaseService.saveDocument(this.COLLECTION_NAME, newSpec.measurementType, newSpec);
+        console.log('Specification synced to Firebase:', newSpec.measurementType);
+      } catch (error) {
+        console.error('Firebase specification sync error:', error);
+      }
+    }
   }
 
-  updateSpecification(measurementType: MeasurementType, spec: Omit<ISOSpecification, 'lastUpdated'>): void {
+  async updateSpecification(measurementType: MeasurementType, spec: Omit<ISOSpecification, 'lastUpdated'>): Promise<void> {
+    const updatedSpec: ISOSpecification = {
+      ...spec,
+      lastUpdated: new Date().toISOString(),
+    };
+
     this._specifications.update(current => {
       const index = current.findIndex(s => s.measurementType === measurementType);
       if (index === -1) {
-        // Add new if not found
-        const newSpec: ISOSpecification = {
-          ...spec,
-          lastUpdated: new Date().toISOString(),
-        };
-        const updated = [...current, newSpec];
+        const updated = [...current, updatedSpec];
         this.saveToStorage(updated);
         return updated;
       }
       
       const updated = [...current];
-      updated[index] = {
-        ...spec,
-        lastUpdated: new Date().toISOString(),
-      };
+      updated[index] = updatedSpec;
       this.saveToStorage(updated);
       return updated;
     });
+
+    // Sync to Firebase
+    if (this.firebaseService.isFirebaseAvailable()) {
+      try {
+        await this.firebaseService.saveDocument(this.COLLECTION_NAME, measurementType, updatedSpec);
+        console.log('Specification updated in Firebase:', measurementType);
+      } catch (error) {
+        console.error('Firebase specification update error:', error);
+      }
+    }
   }
 
-  deleteSpecification(measurementType: MeasurementType): void {
+  async deleteSpecification(measurementType: MeasurementType): Promise<void> {
     this._specifications.update(current => {
       const updated = current.filter(spec => spec.measurementType !== measurementType);
       this.saveToStorage(updated);
       return updated;
     });
+
+    // Sync to Firebase
+    if (this.firebaseService.isFirebaseAvailable()) {
+      try {
+        await this.firebaseService.deleteDocument(this.COLLECTION_NAME, measurementType);
+        console.log('Specification deleted from Firebase:', measurementType);
+      } catch (error) {
+        console.error('Firebase specification delete error:', error);
+      }
+    }
   }
 }

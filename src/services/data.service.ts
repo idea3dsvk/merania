@@ -3,6 +3,7 @@ import { Measurement } from '../models';
 import { TranslationService } from './translation.service';
 import { ToastService } from './toast.service';
 import { ErrorHandlerService } from './error-handler.service';
+import { FirebaseService } from './firebase.service';
 
 // These declare statements are to inform TypeScript about global variables
 // loaded from CDNs in index.html
@@ -16,7 +17,9 @@ export class DataService {
   private translationService = inject(TranslationService);
   private toastService = inject(ToastService);
   private errorHandler = inject(ErrorHandlerService);
+  private firebaseService = inject(FirebaseService);
   private readonly STORAGE_KEY = 'workplace-measurements';
+  private readonly COLLECTION_NAME = 'measurements';
   
   // This is a mock database. In a real application, you would replace this
   // with calls to a backend service like Firebase Firestore.
@@ -27,6 +30,38 @@ export class DataService {
   constructor() {
     // Save to localStorage whenever measurements change
     this.setupAutoSave();
+    // Initialize Firebase sync
+    this.initializeFirebaseSync();
+  }
+
+  private async initializeFirebaseSync(): Promise<void> {
+    if (!this.firebaseService.isFirebaseAvailable()) {
+      console.log('Firebase not available, using localStorage only');
+      return;
+    }
+
+    try {
+      // Load data from Firebase on initialization
+      const firebaseData = await this.firebaseService.getCollection(this.COLLECTION_NAME);
+      if (firebaseData.length > 0) {
+        console.log('Loaded measurements from Firebase:', firebaseData.length);
+        this._measurements.set(firebaseData as Measurement[]);
+        this.saveToStorage(firebaseData as Measurement[]);
+      }
+
+      // Subscribe to real-time updates
+      this.firebaseService.subscribeToCollection(
+        this.COLLECTION_NAME,
+        (data) => {
+          console.log('Firebase real-time update:', data.length);
+          this._measurements.set(data as Measurement[]);
+          this.saveToStorage(data as Measurement[]);
+        }
+      );
+    } catch (error) {
+      console.error('Firebase initialization error:', error);
+      this.errorHandler.handleError(error as Error);
+    }
   }
 
   private loadFromStorage(): Measurement[] {
@@ -65,35 +100,73 @@ export class DataService {
     // so we'll save manually in each mutation method
   }
 
-    // In a real app, this would be an async call to Firebase
-  addMeasurement(measurement: Omit<Measurement, 'id'>) {
+  async addMeasurement(measurement: Omit<Measurement, 'id'>) {
     const newMeasurement = { ...measurement, id: crypto.randomUUID() } as Measurement;
+    
     this._measurements.update(m => {
       const updated = [...m, newMeasurement].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
       this.saveToStorage(updated);
       return updated;
     });
+
+    // Sync to Firebase
+    if (this.firebaseService.isFirebaseAvailable()) {
+      try {
+        await this.firebaseService.saveDocument(this.COLLECTION_NAME, newMeasurement.id, newMeasurement);
+        console.log('Measurement synced to Firebase:', newMeasurement.id);
+      } catch (error) {
+        console.error('Firebase sync error:', error);
+        this.errorHandler.handleError(error as Error);
+      }
+    }
+
     console.log('Added new measurement:', newMeasurement);
     this.toastService.success(this.translationService.translate('toast.measurementAdded'));
   }
 
-  updateMeasurement(id: string, measurement: Omit<Measurement, 'id'>): void {
+  async updateMeasurement(id: string, measurement: Omit<Measurement, 'id'>): Promise<void> {
+    const updatedMeasurement = { ...measurement, id } as Measurement;
+    
     this._measurements.update(m => {
       const updated = m.map(item => 
-        item.id === id ? { ...measurement, id } as Measurement : item
+        item.id === id ? updatedMeasurement : item
       ).sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
       this.saveToStorage(updated);
       return updated;
     });
+
+    // Sync to Firebase
+    if (this.firebaseService.isFirebaseAvailable()) {
+      try {
+        await this.firebaseService.saveDocument(this.COLLECTION_NAME, id, updatedMeasurement);
+        console.log('Measurement updated in Firebase:', id);
+      } catch (error) {
+        console.error('Firebase sync error:', error);
+        this.errorHandler.handleError(error as Error);
+      }
+    }
+
     this.toastService.success(this.translationService.translate('toast.measurementUpdated'));
   }
 
-  deleteMeasurement(id: string): void {
+  async deleteMeasurement(id: string): Promise<void> {
     this._measurements.update(m => {
       const updated = m.filter(measurement => measurement.id !== id);
       this.saveToStorage(updated);
       return updated;
     });
+
+    // Sync to Firebase
+    if (this.firebaseService.isFirebaseAvailable()) {
+      try {
+        await this.firebaseService.deleteDocument(this.COLLECTION_NAME, id);
+        console.log('Measurement deleted from Firebase:', id);
+      } catch (error) {
+        console.error('Firebase delete error:', error);
+        this.errorHandler.handleError(error as Error);
+      }
+    }
+
     this.toastService.success(this.translationService.translate('toast.measurementDeleted'));
   }
 

@@ -87,9 +87,9 @@ export class LimitsDialogComponent implements OnInit {
     }
   }
 
-  onSubmit() {
+  async onSubmit() {
     if (this.form.valid) {
-      this.limitsService.updateLimits(this.measurementType(), this.form.value);
+      await this.limitsService.updateLimits(this.measurementType(), this.form.value);
       this.dialogClosed.emit();
     } else {
       this.form.markAllAsTouched();

@@ -1,5 +1,6 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, inject } from '@angular/core';
 import { MeasurementType } from '../models';
+import { FirebaseService } from './firebase.service';
 
 export interface MeasurementLimits {
   temperature_humidity?: {
@@ -46,11 +47,37 @@ export interface MeasurementLimits {
   providedIn: 'root',
 })
 export class LimitsService {
+  private firebaseService = inject(FirebaseService);
   private readonly STORAGE_KEY = 'measurement-limits';
+  private readonly COLLECTION_NAME = 'limits';
+  private readonly DOCUMENT_ID = 'default-limits';
   
   private _limits = signal<MeasurementLimits>(this.loadFromStorage());
   
   public readonly limits = this._limits.asReadonly();
+
+  constructor() {
+    this.initializeFirebaseSync();
+  }
+
+  private async initializeFirebaseSync(): Promise<void> {
+    if (!this.firebaseService.isFirebaseAvailable()) {
+      console.log('Firebase not available for limits, using localStorage only');
+      return;
+    }
+
+    try {
+      // Load limits from Firebase
+      const firebaseData = await this.firebaseService.getDocument(this.COLLECTION_NAME, this.DOCUMENT_ID);
+      if (firebaseData) {
+        console.log('Loaded limits from Firebase');
+        this._limits.set(firebaseData as MeasurementLimits);
+        this.saveToStorage(firebaseData as MeasurementLimits);
+      }
+    } catch (error) {
+      console.error('Firebase limits initialization error:', error);
+    }
+  }
 
   private loadFromStorage(): MeasurementLimits {
     try {
@@ -113,12 +140,22 @@ export class LimitsService {
     }
   }
 
-  updateLimits(type: MeasurementType, limits: any): void {
+  async updateLimits(type: MeasurementType, limits: any): Promise<void> {
     this._limits.update(current => {
       const updated = { ...current, [type]: limits };
       this.saveToStorage(updated);
       return updated;
     });
+
+    // Sync to Firebase
+    if (this.firebaseService.isFirebaseAvailable()) {
+      try {
+        await this.firebaseService.saveDocument(this.COLLECTION_NAME, this.DOCUMENT_ID, this._limits());
+        console.log('Limits synced to Firebase');
+      } catch (error) {
+        console.error('Firebase limits sync error:', error);
+      }
+    }
   }
 
   getLimitsForType(type: MeasurementType): any {

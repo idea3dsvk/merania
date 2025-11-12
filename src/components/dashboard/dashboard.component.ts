@@ -81,8 +81,8 @@ export class DashboardComponent {
     this.selectedMeasurementType.set(null);
   }
 
-  handleFormSubmit(measurementData: Omit<Measurement, 'id'>) {
-    this.dataService.addMeasurement(measurementData);
+  async handleFormSubmit(measurementData: Omit<Measurement, 'id'>) {
+    await this.dataService.addMeasurement(measurementData);
     this.closeModal();
   }
 

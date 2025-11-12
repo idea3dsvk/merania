@@ -2,11 +2,11 @@
 export const environment = {
   production: false,
   firebase: {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT_ID.appspot.com",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-    appId: "YOUR_APP_ID"
+    apiKey: "AIzaSyClp8810PZUE-52RF1gPJ6dv2iiQb9Ah3k",
+    authDomain: "merania.firebaseapp.com",
+    projectId: "merania",
+    storageBucket: "merania.firebasestorage.app",
+    messagingSenderId: "179511206563",
+    appId: "1:179511206563:web:da8637bdbf28a232c1d516"
   }
 };

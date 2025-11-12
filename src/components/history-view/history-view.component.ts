@@ -211,10 +211,10 @@ export class HistoryViewComponent {
     this.editingMeasurement.set(null);
   }
 
-  handleEditSubmit(measurementData: Omit<Measurement, 'id'>) {
+  async handleEditSubmit(measurementData: Omit<Measurement, 'id'>) {
     const editing = this.editingMeasurement();
     if (editing) {
-      this.dataService.updateMeasurement(editing.id, measurementData);
+      await this.dataService.updateMeasurement(editing.id, measurementData);
       this.closeEditModal();
     }
   }
@@ -229,10 +229,10 @@ export class HistoryViewComponent {
     this.deletingMeasurementId.set(null);
   }
 
-  confirmDelete() {
+  async confirmDelete() {
     const id = this.deletingMeasurementId();
     if (id) {
-      this.dataService.deleteMeasurement(id);
+      await this.dataService.deleteMeasurement(id);
       this.closeDeleteConfirm();
     }
   }
