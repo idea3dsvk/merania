@@ -98,28 +98,33 @@ export class LoginComponent {
   // Output event to notify parent when login is successful
   loginSuccess = output<void>();
 
-  onSubmit(): void {
+  async onSubmit(): Promise<void> {
     // Clear previous error
     this.errorMessage.set('');
 
     // Validate inputs
     if (!this.username || !this.password) {
-      this.errorMessage.set('Prosím vyplňte meno a heslo');
+      this.errorMessage.set('Prosím vyplňte email a heslo');
       return;
     }
 
     // Attempt login
-    const success = this.authService.login({
-      username: this.username,
-      password: this.password
-    });
+    try {
+      const success = await this.authService.login({
+        username: this.username,
+        password: this.password
+      });
 
-    if (success) {
-      // Emit success event to parent component
-      this.loginSuccess.emit();
-    } else {
-      // Show error message
-      this.errorMessage.set('Nesprávne prihlasovacie údaje');
+      if (success) {
+        // Emit success event to parent component
+        this.loginSuccess.emit();
+      } else {
+        // Show error message
+        this.errorMessage.set('Nesprávne prihlasovacie údaje');
+      }
+    } catch (error) {
+      this.errorMessage.set('Chyba prihlásenia. Skúste znova.');
+      console.error('Login error:', error);
     }
   }
 }

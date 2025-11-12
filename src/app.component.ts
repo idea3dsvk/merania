@@ -39,8 +39,8 @@ export class AppComponent {
     this.activeView.set('dashboard');
   }
   
-  onLogout(): void {
-    this.authService.logout();
+  async onLogout(): Promise<void> {
+    await this.authService.logout();
     this.activeView.set('dashboard');
   }
 }

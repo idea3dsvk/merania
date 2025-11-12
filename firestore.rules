@@ -1,0 +1,50 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Helper function to get user role from users collection
+    function getUserRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+    
+    // Helper function to check if user is admin
+    function isAdmin() {
+      return isAuthenticated() && getUserRole() == 'admin';
+    }
+    
+    // Helper function to check if user is moderator or admin
+    function canEdit() {
+      return isAuthenticated() && (getUserRole() == 'admin' || getUserRole() == 'moderator');
+    }
+    
+    // Users collection - store user roles
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if false; // Only create via admin console
+    }
+    
+    // Measurements collection
+    match /measurements/{measurementId} {
+      allow read: if isAuthenticated();
+      allow create, update: if canEdit();
+      allow delete: if isAdmin();
+    }
+    
+    // Limits collection
+    match /limits/{limitId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+    
+    // Specifications collection
+    match /specifications/{specId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+  }
+}

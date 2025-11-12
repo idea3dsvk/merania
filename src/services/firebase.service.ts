@@ -14,6 +14,15 @@ import {
   onSnapshot,
   Unsubscribe
 } from 'firebase/firestore';
+import { 
+  getAuth, 
+  Auth, 
+  signInWithEmailAndPassword, 
+  createUserWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+  User as FirebaseUser
+} from 'firebase/auth';
 import { environment } from '../environments/environment';
 
 @Injectable({
@@ -22,6 +31,7 @@ import { environment } from '../environments/environment';
 export class FirebaseService {
   private app: FirebaseApp;
   private firestore: Firestore;
+  private auth: Auth;
   private isOnline = true;
 
   constructor() {
@@ -29,6 +39,7 @@ export class FirebaseService {
       // Initialize Firebase
       this.app = initializeApp(environment.firebase);
       this.firestore = getFirestore(this.app);
+      this.auth = getAuth(this.app);
       
       // Check if Firebase is configured
       if (!environment.firebase.apiKey || environment.firebase.apiKey === 'YOUR_API_KEY') {
@@ -39,6 +50,81 @@ export class FirebaseService {
       console.error('Firebase initialization error:', error);
       this.isOnline = false;
     }
+  }
+
+  /**
+   * Get Auth instance
+   */
+  getAuthInstance(): Auth {
+    return this.auth;
+  }
+
+  /**
+   * Get current authenticated user
+   */
+  getCurrentUser(): FirebaseUser | null {
+    return this.auth.currentUser;
+  }
+
+  /**
+   * Sign in with email and password
+   */
+  async signInWithEmail(email: string, password: string): Promise<FirebaseUser> {
+    if (!this.isOnline) {
+      throw new Error('Firebase not available');
+    }
+    
+    try {
+      const userCredential = await signInWithEmailAndPassword(this.auth, email, password);
+      return userCredential.user;
+    } catch (error: any) {
+      console.error('Sign in error:', error);
+      throw new Error(error.message || 'Failed to sign in');
+    }
+  }
+
+  /**
+   * Create new user with email and password
+   */
+  async createUser(email: string, password: string): Promise<FirebaseUser> {
+    if (!this.isOnline) {
+      throw new Error('Firebase not available');
+    }
+    
+    try {
+      const userCredential = await createUserWithEmailAndPassword(this.auth, email, password);
+      return userCredential.user;
+    } catch (error: any) {
+      console.error('Create user error:', error);
+      throw new Error(error.message || 'Failed to create user');
+    }
+  }
+
+  /**
+   * Sign out current user
+   */
+  async signOutUser(): Promise<void> {
+    if (!this.isOnline) {
+      return;
+    }
+    
+    try {
+      await signOut(this.auth);
+    } catch (error) {
+      console.error('Sign out error:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Listen to auth state changes
+   */
+  onAuthStateChange(callback: (user: FirebaseUser | null) => void): () => void {
+    if (!this.isOnline) {
+      return () => {};
+    }
+    
+    return onAuthStateChanged(this.auth, callback);
   }
 
   /**

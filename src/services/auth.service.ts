@@ -1,16 +1,18 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, inject } from '@angular/core';
 import { User, UserRole, UserCredentials } from '../models';
+import { FirebaseService } from './firebase.service';
 
-// Predefined user accounts
-const USERS = [
-  { username: 'auotns@gmail.com', password: '11238558', role: 'admin' as UserRole },
-  { username: 'moderator@auo.com', password: 'AUOmoderator', role: 'moderator' as UserRole }
-];
+// Predefined user accounts with roles
+const USER_ROLES: { [email: string]: UserRole } = {
+  'auotns@gmail.com': 'admin',
+  'moderator@auo.com': 'moderator'
+};
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
+  private firebaseService = inject(FirebaseService);
   private readonly STORAGE_KEY = 'current-user';
   
   // Current authenticated user
@@ -25,7 +27,33 @@ export class AuthService {
   // Computed: current user role
   public readonly currentRole = computed(() => this._currentUser()?.role || null);
 
-  constructor() {}
+  constructor() {
+    // Listen to Firebase auth state changes
+    this.initializeAuthListener();
+  }
+
+  /**
+   * Initialize Firebase auth listener
+   */
+  private initializeAuthListener(): void {
+    if (this.firebaseService.isFirebaseAvailable()) {
+      this.firebaseService.onAuthStateChange((firebaseUser) => {
+        if (firebaseUser && firebaseUser.email) {
+          const role = USER_ROLES[firebaseUser.email] || 'moderator';
+          const user: User = {
+            username: firebaseUser.email,
+            role: role
+          };
+          this._currentUser.set(user);
+          this.saveUserToStorage(user);
+        } else if (!firebaseUser) {
+          // User signed out
+          this._currentUser.set(null);
+          this.saveUserToStorage(null);
+        }
+      });
+    }
+  }
 
   /**
    * Load user from localStorage on service initialization
@@ -58,31 +86,49 @@ export class AuthService {
   }
 
   /**
-   * Attempt to login with username and password
+   * Attempt to login with username (email) and password
    * Returns true if successful, false otherwise
    */
-  login(credentials: UserCredentials): boolean {
-    const user = USERS.find(
-      u => u.username === credentials.username && u.password === credentials.password
-    );
-    
-    if (user) {
-      const authenticatedUser: User = {
-        username: user.username,
-        role: user.role
-      };
-      this._currentUser.set(authenticatedUser);
-      this.saveUserToStorage(authenticatedUser);
-      return true;
+  async login(credentials: UserCredentials): Promise<boolean> {
+    try {
+      // Try Firebase Authentication
+      if (this.firebaseService.isFirebaseAvailable()) {
+        const firebaseUser = await this.firebaseService.signInWithEmail(
+          credentials.username, 
+          credentials.password
+        );
+        
+        if (firebaseUser && firebaseUser.email) {
+          const role = USER_ROLES[firebaseUser.email] || 'moderator';
+          const authenticatedUser: User = {
+            username: firebaseUser.email,
+            role: role
+          };
+          this._currentUser.set(authenticatedUser);
+          this.saveUserToStorage(authenticatedUser);
+          return true;
+        }
+      }
+      
+      return false;
+    } catch (error) {
+      console.error('Login error:', error);
+      return false;
     }
-    
-    return false;
   }
 
   /**
    * Logout current user
    */
-  logout(): void {
+  async logout(): Promise<void> {
+    try {
+      if (this.firebaseService.isFirebaseAvailable()) {
+        await this.firebaseService.signOutUser();
+      }
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+    
     this._currentUser.set(null);
     this.saveUserToStorage(null);
   }
