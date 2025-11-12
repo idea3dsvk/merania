@@ -25,8 +25,8 @@ Open [http://localhost:3000](http://localhost:3000)
 
 **Demo Login:**
 
-- Admin: `admin` / `admin123`
-- Moderator: `moderator` / `mod123`
+- Admin: `auotns@gmail.com` / xxxxxxxx
+- Moderator: `moderator@auo.com` / xxxxxx
 
 ## 📦 Deploy to GitHub Pages
 
