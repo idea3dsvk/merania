@@ -6,9 +6,9 @@
   "scripts": {
     "dev": "ng serve",
     "build": "ng build",
-    "build:prod": "ng build --configuration=production --base-href /workplace-condition-monitor/",
+    "build:prod": "ng build --configuration=production --base-href /merania/",
     "preview": "ng serve --configuration=production",
-    "deploy": "npm run build:prod && npx angular-cli-ghpages --dir=dist/workplace-condition-monitor/browser"
+    "deploy": "npm run build:prod && npx angular-cli-ghpages --dir=dist"
   },
   "dependencies": {
     "@angular/animations": "^20.3.10",
