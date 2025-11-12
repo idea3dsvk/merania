@@ -37,15 +37,29 @@ export class AuthService {
    */
   private initializeAuthListener(): void {
     if (this.firebaseService.isFirebaseAvailable()) {
-      this.firebaseService.onAuthStateChange((firebaseUser) => {
+      this.firebaseService.onAuthStateChange(async (firebaseUser) => {
         if (firebaseUser && firebaseUser.email) {
-          const role = USER_ROLES[firebaseUser.email] || 'moderator';
-          const user: User = {
-            username: firebaseUser.email,
-            role: role
-          };
-          this._currentUser.set(user);
-          this.saveUserToStorage(user);
+          // Try to get role from Firestore users collection
+          try {
+            const userDoc = await this.firebaseService.getDocument('users', firebaseUser.uid);
+            const role = userDoc?.role || USER_ROLES[firebaseUser.email] || 'moderator';
+            const user: User = {
+              username: firebaseUser.email,
+              role: role
+            };
+            this._currentUser.set(user);
+            this.saveUserToStorage(user);
+          } catch (error) {
+            console.error('Error loading user role:', error);
+            // Fallback to hardcoded roles
+            const role = USER_ROLES[firebaseUser.email] || 'moderator';
+            const user: User = {
+              username: firebaseUser.email,
+              role: role
+            };
+            this._currentUser.set(user);
+            this.saveUserToStorage(user);
+          }
         } else if (!firebaseUser) {
           // User signed out
           this._currentUser.set(null);
@@ -99,14 +113,29 @@ export class AuthService {
         );
         
         if (firebaseUser && firebaseUser.email) {
-          const role = USER_ROLES[firebaseUser.email] || 'moderator';
-          const authenticatedUser: User = {
-            username: firebaseUser.email,
-            role: role
-          };
-          this._currentUser.set(authenticatedUser);
-          this.saveUserToStorage(authenticatedUser);
-          return true;
+          // Try to get role from Firestore
+          try {
+            const userDoc = await this.firebaseService.getDocument('users', firebaseUser.uid);
+            const role = userDoc?.role || USER_ROLES[firebaseUser.email] || 'moderator';
+            const authenticatedUser: User = {
+              username: firebaseUser.email,
+              role: role
+            };
+            this._currentUser.set(authenticatedUser);
+            this.saveUserToStorage(authenticatedUser);
+            return true;
+          } catch (error) {
+            console.error('Error loading user role:', error);
+            // Fallback to hardcoded roles
+            const role = USER_ROLES[firebaseUser.email] || 'moderator';
+            const authenticatedUser: User = {
+              username: firebaseUser.email,
+              role: role
+            };
+            this._currentUser.set(authenticatedUser);
+            this.saveUserToStorage(authenticatedUser);
+            return true;
+          }
         }
       }
       
