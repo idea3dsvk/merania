@@ -3,8 +3,8 @@ import { User, UserRole, UserCredentials } from '../models';
 
 // Predefined user accounts
 const USERS = [
-  { username: 'admin', password: 'admin123', role: 'admin' as UserRole },
-  { username: 'moderator', password: 'mod123', role: 'moderator' as UserRole }
+  { username: 'auotns@gmail.com', password: '11238558', role: 'admin' as UserRole },
+  { username: 'moderator@auo.com', password: 'AUOmoderator', role: 'moderator' as UserRole }
 ];
 
 @Injectable({

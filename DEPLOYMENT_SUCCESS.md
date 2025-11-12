@@ -60,13 +60,13 @@ Po dokončení deploymenu bude aplikácia dostupná na:
 
 **Administrator** (plný prístup):
 
-- Meno: `admin`
-- Heslo: `admin123`
+- Email: `auotns@gmail.com`
+- Heslo: `11238558`
 
 **Moderátor** (obmedzený prístup):
 
-- Meno: `moderator`
-- Heslo: `mod123`
+- Email: `moderator@auo.com`
+- Heslo: `AUOmoderator`
 
 ---
 

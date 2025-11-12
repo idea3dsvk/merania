@@ -79,8 +79,8 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
         <div class="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
           <p class="text-xs font-semibold text-gray-700 mb-2">{{ 'login.demoAccounts' | translate }}:</p>
           <div class="text-xs text-gray-600 space-y-1">
-            <p><strong>{{ 'login.admin' | translate }}:</strong> admin / admin123</p>
-            <p><strong>{{ 'login.moderator' | translate }}:</strong> moderator / mod123</p>
+            <p><strong>{{ 'login.admin' | translate }}:</strong> auotns&#64;gmail.com</p>
+            <p><strong>{{ 'login.moderator' | translate }}:</strong> moderator&#64;auo.com</p>
           </div>
         </div>
       </div>
