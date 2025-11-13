@@ -6,8 +6,23 @@
 <!-- Main Application (only shown when authenticated) -->
 @if (isAuthenticated()) {
 <div class="flex h-screen bg-gray-100 font-sans">
+  <!-- Mobile menu overlay -->
+  @if (mobileMenuOpen()) {
+    <div 
+      class="fixed inset-0 bg-gray-600 bg-opacity-75 z-20 lg:hidden"
+      (click)="toggleMobileMenu()"
+      aria-hidden="true"
+    ></div>
+  }
+  
   <!-- Sidebar -->
-  <aside class="w-64 flex-shrink-0 bg-gray-800 text-white flex flex-col" role="navigation" aria-label="Main navigation">
+  <aside 
+    [class.translate-x-0]="mobileMenuOpen()"
+    [class.-translate-x-full]="!mobileMenuOpen()"
+    class="fixed lg:static inset-y-0 left-0 z-30 w-64 flex-shrink-0 bg-gray-800 text-white flex flex-col transform transition-transform duration-300 ease-in-out lg:translate-x-0" 
+    role="navigation" 
+    aria-label="Main navigation"
+  >
     <div class="h-16 flex items-center justify-center bg-gray-900 shadow-md">
       <span class="text-xl font-bold tracking-wider">WCM</span>
       <span class="ml-2 text-sm text-gray-400">v1.0</span>
@@ -74,17 +89,29 @@
 
   <!-- Main content -->
   <main class="flex-1 flex flex-col overflow-hidden">
-    <header class="h-16 bg-white border-b border-gray-200 flex items-center px-6 justify-between" role="banner">
-      <h1 class="text-2xl font-semibold text-gray-800">
+    <header class="h-16 bg-white border-b border-gray-200 flex items-center px-4 sm:px-6 justify-between" role="banner">
+      <!-- Mobile menu button -->
+      <button
+        (click)="toggleMobileMenu()"
+        class="lg:hidden p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
+        aria-expanded="false"
+        aria-label="Toggle menu"
+      >
+        <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+      
+      <h1 class="text-lg sm:text-2xl font-semibold text-gray-800 truncate">
         {{ 'header.' + activeView() | translate }}
       </h1>
-      <div class="flex items-center gap-4">
-        <!-- User info -->
-        <div class="flex items-center gap-2 text-sm text-gray-600">
+      <div class="flex items-center gap-2 sm:gap-4">
+        <!-- User info - Hidden on small screens -->
+        <div class="hidden md:flex items-center gap-2 text-sm text-gray-600">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
           </svg>
-          <span class="font-medium">{{ currentUser()?.username }}</span>
+          <span class="font-medium hidden lg:inline">{{ currentUser()?.username }}</span>
           <span class="px-2 py-1 text-xs rounded-full" [class.bg-red-100]="currentUser()?.role === 'admin'" [class.text-red-800]="currentUser()?.role === 'admin'" [class.bg-blue-100]="currentUser()?.role === 'moderator'" [class.text-blue-800]="currentUser()?.role === 'moderator'">
             {{ 'login.' + currentUser()?.role | translate }}
           </span>
@@ -93,13 +120,16 @@
         <!-- Logout button -->
         <button 
           (click)="onLogout()"
-          class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 transition-colors"
+          class="px-2 sm:px-4 py-2 text-xs sm:text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 transition-colors"
         >
-          {{ 'login.logout' | translate }}
+          <span class="hidden sm:inline">{{ 'login.logout' | translate }}</span>
+          <svg class="sm:hidden h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd" />
+          </svg>
         </button>
         
         <!-- Language selector -->
-        <div>
+        <div class="hidden sm:block">
           <label for="language-select" class="sr-only">Select Language</label>
           <select 
             id="language-select"
@@ -115,7 +145,7 @@
         </div>
       </div>
     </header>
-    <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6" role="main" aria-label="Main content">
+    <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-4 sm:p-6" role="main" aria-label="Main content">
       @switch (activeView()) {
         @case ('dashboard') {
           <app-dashboard></app-dashboard>

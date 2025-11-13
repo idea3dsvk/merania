@@ -19,6 +19,7 @@ import { Language } from './translations';
 })
 export class AppComponent {
   activeView = signal<'dashboard' | 'history' | 'statistics' | 'specifications'>('dashboard');
+  mobileMenuOpen = signal<boolean>(false);
   translationService = inject(TranslationService);
   authService = inject(AuthService);
   
@@ -28,6 +29,12 @@ export class AppComponent {
 
   setView(view: 'dashboard' | 'history' | 'statistics' | 'specifications'): void {
     this.activeView.set(view);
+    // Close mobile menu when navigating
+    this.mobileMenuOpen.set(false);
+  }
+  
+  toggleMobileMenu(): void {
+    this.mobileMenuOpen.update(open => !open);
   }
 
   setLanguage(event: Event) {

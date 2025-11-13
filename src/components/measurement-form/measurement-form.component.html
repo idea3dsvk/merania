@@ -1,119 +1,119 @@
-<form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-4">
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-3 sm:space-y-4">
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
     <div>
-      <label for="date" class="block text-sm font-medium text-gray-700">{{ 'form.date' | translate }}</label>
-      <input type="datetime-local" id="date" formControlName="date" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+      <label for="date" class="block text-xs sm:text-sm font-medium text-gray-700">{{ 'form.date' | translate }}</label>
+      <input type="datetime-local" id="date" formControlName="date" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
     </div>
     <div>
-      <label for="location" class="block text-sm font-medium text-gray-700">{{ 'form.location' | translate }}</label>
-      <input type="text" id="location" formControlName="location" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" [placeholder]="'form.placeholderLocation' | translate">
+      <label for="location" class="block text-xs sm:text-sm font-medium text-gray-700">{{ 'form.location' | translate }}</label>
+      <input type="text" id="location" formControlName="location" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" [placeholder]="'form.placeholderLocation' | translate">
     </div>
   </div>
 
   <div>
-    <label for="deviceId" class="block text-sm font-medium text-gray-700">{{ 'form.deviceId' | translate }} ({{ 'form.optional' | translate }})</label>
-    <input type="text" id="deviceId" formControlName="deviceId" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" [placeholder]="'form.placeholderDeviceId' | translate">
+    <label for="deviceId" class="block text-xs sm:text-sm font-medium text-gray-700">{{ 'form.deviceId' | translate }} ({{ 'form.optional' | translate }})</label>
+    <input type="text" id="deviceId" formControlName="deviceId" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" [placeholder]="'form.placeholderDeviceId' | translate">
   </div>
 
   @switch (measurementType()) {
     @case ('temperature_humidity') {
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
         <div>
-          <label for="temperature" class="block text-sm font-medium text-gray-700">{{ 'form.temperature' | translate }}</label>
-          <input type="number" id="temperature" formControlName="temperature" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" step="0.1">
+          <label for="temperature" class="block text-xs sm:text-sm font-medium text-gray-700">{{ 'form.temperature' | translate }}</label>
+          <input type="number" id="temperature" formControlName="temperature" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" step="0.1">
         </div>
         <div>
-          <label for="humidity" class="block text-sm font-medium text-gray-700">{{ 'form.humidity' | translate }}</label>
-          <input type="number" id="humidity" formControlName="humidity" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" min="0" max="100" step="0.1">
+          <label for="humidity" class="block text-xs sm:text-sm font-medium text-gray-700">{{ 'form.humidity' | translate }}</label>
+          <input type="number" id="humidity" formControlName="humidity" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" min="0" max="100" step="0.1">
         </div>
       </div>
     }
     @case ('luminosity') {
       <div>
-        <label for="luminosity" class="block text-sm font-medium text-gray-700">{{ 'form.luminosity' | translate }}</label>
-        <input type="number" id="luminosity" formControlName="luminosity" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+        <label for="luminosity" class="block text-xs sm:text-sm font-medium text-gray-700">{{ 'form.luminosity' | translate }}</label>
+        <input type="number" id="luminosity" formControlName="luminosity" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
       </div>
     }
     @case ('dustiness_iso6') {
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
         <div>
-          <label for="particles_0_5um" class="block text-sm font-medium text-gray-700">{{ 'form.particles_0_5um' | translate }}</label>
-          <input type="number" id="particles_0_5um" formControlName="particles_0_5um" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+          <label for="particles_0_5um" class="block text-xs sm:text-sm font-medium text-gray-700">{{ 'form.particles_0_5um' | translate }}</label>
+          <input type="number" id="particles_0_5um" formControlName="particles_0_5um" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
         </div>
         <div>
-          <label for="particles_5um" class="block text-sm font-medium text-gray-700">{{ 'form.particles_5um' | translate }}</label>
-          <input type="number" id="particles_5um" formControlName="particles_5um" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+          <label for="particles_5um" class="block text-xs sm:text-sm font-medium text-gray-700">{{ 'form.particles_5um' | translate }}</label>
+          <input type="number" id="particles_5um" formControlName="particles_5um" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
         </div>
       </div>
     }
     @case ('dustiness_iso5') {
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
         <div>
-          <label for="particles_0_5um" class="block text-sm font-medium text-gray-700">{{ 'form.particles_0_5um' | translate }}</label>
-          <input type="number" id="particles_0_5um" formControlName="particles_0_5um" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+          <label for="particles_0_5um" class="block text-xs sm:text-sm font-medium text-gray-700">{{ 'form.particles_0_5um' | translate }}</label>
+          <input type="number" id="particles_0_5um" formControlName="particles_0_5um" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
         </div>
         <div>
-          <label for="particles_5um" class="block text-sm font-medium text-gray-700">{{ 'form.particles_5um' | translate }}</label>
-          <input type="number" id="particles_5um" formControlName="particles_5um" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+          <label for="particles_5um" class="block text-xs sm:text-sm font-medium text-gray-700">{{ 'form.particles_5um' | translate }}</label>
+          <input type="number" id="particles_5um" formControlName="particles_5um" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
         </div>
       </div>
     }
     @case ('torque') {
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
         <div>
-          <label for="screwdriverId" class="block text-sm font-medium text-gray-700">{{ 'form.screwdriverId' | translate }}</label>
-          <input type="text" id="screwdriverId" formControlName="screwdriverId" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" [placeholder]="'form.placeholderScrewdriver' | translate">
+          <label for="screwdriverId" class="block text-xs sm:text-sm font-medium text-gray-700">{{ 'form.screwdriverId' | translate }}</label>
+          <input type="text" id="screwdriverId" formControlName="screwdriverId" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" [placeholder]="'form.placeholderScrewdriver' | translate">
         </div>
         <div>
-          <label for="torqueValue" class="block text-sm font-medium text-gray-700">{{ 'form.torque' | translate }}</label>
-          <input type="number" id="torqueValue" formControlName="torqueValue" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+          <label for="torqueValue" class="block text-xs sm:text-sm font-medium text-gray-700">{{ 'form.torque' | translate }}</label>
+          <input type="number" id="torqueValue" formControlName="torqueValue" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
         </div>
       </div>
     }
     @case ('surface_resistance') {
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
           <div>
-              <label for="material" class="block text-sm font-medium text-gray-700">{{ 'form.material' | translate }}</label>
-              <input type="text" id="material" formControlName="material" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+              <label for="material" class="block text-xs sm:text-sm font-medium text-gray-700">{{ 'form.material' | translate }}</label>
+              <input type="text" id="material" formControlName="material" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
           </div>
           <div>
-              <label for="resistance" class="block text-sm font-medium text-gray-700">{{ 'form.resistance' | translate }}</label>
-              <input type="number" id="resistance" formControlName="resistance" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+              <label for="resistance" class="block text-xs sm:text-sm font-medium text-gray-700">{{ 'form.resistance' | translate }}</label>
+              <input type="number" id="resistance" formControlName="resistance" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
           </div>
       </div>
     }
     @case ('grounding_resistance') {
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
           <div>
-              <label for="pointId" class="block text-sm font-medium text-gray-700">{{ 'form.groundingPointId' | translate }}</label>
-              <input type="text" id="pointId" formControlName="pointId" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+              <label for="pointId" class="block text-xs sm:text-sm font-medium text-gray-700">{{ 'form.groundingPointId' | translate }}</label>
+              <input type="text" id="pointId" formControlName="pointId" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
           </div>
           <div>
-              <label for="resistance" class="block text-sm font-medium text-gray-700">{{ 'form.resistance' | translate }}</label>
-              <input type="number" id="resistance" formControlName="resistance" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+              <label for="resistance" class="block text-xs sm:text-sm font-medium text-gray-700">{{ 'form.resistance' | translate }}</label>
+              <input type="number" id="resistance" formControlName="resistance" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
           </div>
       </div>
     }
     @case ('ionizer') {
       <div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div>
-              <label for="ionizerId" class="block text-sm font-medium text-gray-700">{{ 'form.ionizerId' | translate }}</label>
-              <input type="text" id="ionizerId" formControlName="ionizerId" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+              <label for="ionizerId" class="block text-xs sm:text-sm font-medium text-gray-700">{{ 'form.ionizerId' | translate }}</label>
+              <input type="text" id="ionizerId" formControlName="ionizerId" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
             </div>
             <div>
-                <label for="balance" class="block text-sm font-medium text-gray-700">{{ 'form.balance' | translate }}</label>
-                <input type="number" id="balance" formControlName="balance" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                <label for="balance" class="block text-xs sm:text-sm font-medium text-gray-700">{{ 'form.balance' | translate }}</label>
+                <input type="number" id="balance" formControlName="balance" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
             </div>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mt-3 sm:mt-4">
             <div>
-              <label for="decayTimePositive" class="block text-sm font-medium text-gray-700">{{ 'form.decayTimePositive' | translate }}</label>
-              <input type="number" id="decayTimePositive" formControlName="decayTimePositive" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+              <label for="decayTimePositive" class="block text-xs sm:text-sm font-medium text-gray-700">{{ 'form.decayTimePositive' | translate }}</label>
+              <input type="number" id="decayTimePositive" formControlName="decayTimePositive" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
             </div>
             <div>
-              <label for="decayTimeNegative" class="block text-sm font-medium text-gray-700">{{ 'form.decayTimeNegative' | translate }}</label>
-              <input type="number" id="decayTimeNegative" formControlName="decayTimeNegative" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+              <label for="decayTimeNegative" class="block text-xs sm:text-sm font-medium text-gray-700">{{ 'form.decayTimeNegative' | translate }}</label>
+              <input type="number" id="decayTimeNegative" formControlName="decayTimeNegative" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
             </div>
         </div>
       </div>
@@ -121,15 +121,15 @@
   }
 
   <div>
-    <label for="notes" class="block text-sm font-medium text-gray-700">{{ 'form.notes' | translate }}</label>
-    <textarea id="notes" formControlName="notes" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></textarea>
+    <label for="notes" class="block text-xs sm:text-sm font-medium text-gray-700">{{ 'form.notes' | translate }}</label>
+    <textarea id="notes" formControlName="notes" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"></textarea>
   </div>
 
-  <div class="flex justify-end space-x-3 pt-4">
-    <button type="button" (click)="cancel()" class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+  <div class="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 pt-3 sm:pt-4">
+    <button type="button" (click)="cancel()" class="w-full sm:w-auto bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
       {{ 'form.cancel' | translate }}
     </button>
-    <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" [disabled]="form.invalid">
+    <button type="submit" class="w-full sm:w-auto inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" [disabled]="form.invalid">
       {{ 'form.save' | translate }}
     </button>
   </div>
