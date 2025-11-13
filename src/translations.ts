@@ -21,14 +21,16 @@ export const translations = {
     // app.component
     sidebar: {
       dashboard: 'Dashboard',
-      history: 'History & Trends',
+      history: 'History',
       statistics: 'Statistics',
+      charts: 'Charts',
       specifications: 'Specifications',
     },
     header: {
       dashboard: 'Dashboard',
       history: 'History & Trends',
       statistics: 'Statistics & Reports',
+      charts: 'Interactive Charts',
       specifications: 'ISO Standards & Specifications',
     },
     // dashboard.component
@@ -164,6 +166,13 @@ export const translations = {
       recentTrends: 'Recent Trends',
       trendInfo: 'Trends compare the last 30 days with the previous 30 days',
     },
+    charts: {
+      title: 'Interactive Charts',
+      selectType: 'Select Measurement Type',
+      trendOverTime: 'Trend Over Time (Last 30 Records)',
+      measurementsByType: 'Total Measurements by Type',
+      noData: 'No data available for selected type',
+    },
     specifications: {
       title: 'ISO Standards & Specifications',
       description: 'Manage ISO standards and specifications for each measurement type',
@@ -226,12 +235,14 @@ export const translations = {
       dashboard: 'Dashboard',
       history: 'História a trendy',
       statistics: 'Štatistiky',
+      charts: 'Grafy',
       specifications: 'Špecifikácie',
     },
     header: {
       dashboard: 'Dashboard',
       history: 'História a trendy',
       statistics: 'Štatistiky a reporty',
+      charts: 'Interaktívne grafy',
       specifications: 'ISO normy a špecifikácie',
     },
     dashboard: {
@@ -361,6 +372,13 @@ export const translations = {
       recentTrends: 'Posledné trendy',
       trendInfo: 'Trendy porovnávajú posledných 30 dní s predchádzajúcimi 30 dňami',
     },
+    charts: {
+      title: 'Interaktívne grafy',
+      selectType: 'Vyberte typ merania',
+      trendOverTime: 'Trend v čase (posledných 30 záznamov)',
+      measurementsByType: 'Celkom meraní podľa typu',
+      noData: 'Žiadne dostupné dáta pre vybraný typ',
+    },
     specifications: {
       title: 'ISO normy a špecifikácie',
       description: 'Spravujte ISO normy a špecifikácie pre jednotlivé typy meraní',
@@ -423,12 +441,14 @@ export const translations = {
       dashboard: 'Dashboard',
       history: 'Verlauf & Trends',
       statistics: 'Statistiken',
+      charts: 'Diagramme',
       specifications: 'Spezifikationen',
     },
     header: {
       dashboard: 'Dashboard',
       history: 'Verlauf & Trends',
       statistics: 'Statistiken & Berichte',
+      charts: 'Interaktive Diagramme',
       specifications: 'ISO-Normen & Spezifikationen',
     },
     dashboard: {
@@ -557,6 +577,13 @@ export const translations = {
       topLocations: 'Top 5 Standorte',
       recentTrends: 'Aktuelle Trends',
       trendInfo: 'Trends vergleichen die letzten 30 Tage mit den vorherigen 30 Tagen',
+    },
+    charts: {
+      title: 'Interaktive Diagramme',
+      selectType: 'Messtyp auswählen',
+      trendOverTime: 'Trend im Zeitverlauf (letzte 30 Einträge)',
+      measurementsByType: 'Gesamtmessungen nach Typ',
+      noData: 'Keine Daten für den ausgewählten Typ verfügbar',
     },
     specifications: {
       title: 'ISO-Normen & Spezifikationen',

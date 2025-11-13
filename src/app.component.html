@@ -72,6 +72,21 @@
       </a>
       <a
         href="javascript:void(0)"
+        (click)="setView('charts')"
+        [class.bg-gray-700]="activeView() === 'charts'"
+        class="flex items-center px-4 py-2 rounded-md hover:bg-gray-700 transition-colors duration-200"
+        role="button"
+        [attr.aria-current]="activeView() === 'charts' ? 'page' : null"
+        aria-label="Navigate to Charts"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" viewBox="0 0 20 20" fill="currentColor">
+          <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z" />
+          <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z" />
+        </svg>
+        {{ 'sidebar.charts' | translate }}
+      </a>
+      <a
+        href="javascript:void(0)"
         (click)="setView('specifications')"
         [class.bg-gray-700]="activeView() === 'specifications'"
         class="flex items-center px-4 py-2 rounded-md hover:bg-gray-700 transition-colors duration-200"
@@ -155,6 +170,9 @@
         }
         @case ('statistics') {
           <app-statistics></app-statistics>
+        }
+        @case ('charts') {
+          <app-trend-charts></app-trend-charts>
         }
         @case ('specifications') {
           <app-specifications-view></app-specifications-view>

@@ -1,0 +1,50 @@
+<div class="bg-white rounded-lg shadow-md p-4 sm:p-6">
+  <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-4 sm:mb-6">{{ 'charts.title' | translate }}</h2>
+
+  <!-- Type Selector -->
+  <div class="mb-6">
+    <label for="chartType" class="block text-sm font-medium text-gray-700 mb-2">{{ 'charts.selectType' | translate }}</label>
+    <select 
+      id="chartType" 
+      [(ngModel)]="selectedType" 
+      (ngModelChange)="selectedType.set($event)"
+      class="block w-full sm:w-auto rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
+    >
+      @for (type of measurementTypes; track type) {
+        <option [value]="type">{{ getMeasurementTypeName(type) }}</option>
+      }
+    </select>
+  </div>
+
+  <!-- Line Chart - Trend over time -->
+  <div class="mb-8">
+    <h3 class="text-lg font-semibold text-gray-800 mb-4">{{ 'charts.trendOverTime' | translate }}</h3>
+    <div class="bg-gray-50 rounded-lg p-4" style="height: 400px;">
+      @if (lineChartData().labels.length > 0) {
+        <canvas 
+          baseChart
+          [type]="lineChartType"
+          [data]="lineChartData()"
+          [options]="lineChartOptions">
+        </canvas>
+      } @else {
+        <div class="flex items-center justify-center h-full">
+          <p class="text-gray-500 italic">{{ 'charts.noData' | translate }}</p>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Bar Chart - Measurements by Type -->
+  <div>
+    <h3 class="text-lg font-semibold text-gray-800 mb-4">{{ 'charts.measurementsByType' | translate }}</h3>
+    <div class="bg-gray-50 rounded-lg p-4" style="height: 300px;">
+      <canvas 
+        baseChart
+        [type]="barChartType"
+        [data]="barChartData()"
+        [options]="barChartOptions">
+      </canvas>
+    </div>
+  </div>
+</div>
