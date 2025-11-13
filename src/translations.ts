@@ -153,6 +153,16 @@ export const translations = {
       title: 'Set Limits',
       save: 'Save Limits',
     },
+    statistics: {
+      title: 'Statistics & Summary Report',
+      totalMeasurements: 'Total Measurements',
+      outOfSpec: 'Out of Spec',
+      inSpec: 'In Spec',
+      locations: 'Locations',
+      measurementsByType: 'Measurements by Type',
+      topLocations: 'Top 5 Locations',
+      recentTrends: 'Recent Trends',
+    },
     specifications: {
       title: 'ISO Standards & Specifications',
       description: 'Manage ISO standards and specifications for each measurement type',
@@ -338,6 +348,16 @@ export const translations = {
       title: 'Nastaviť limity',
       save: 'Uložiť limity',
     },
+    statistics: {
+      title: 'Štatistiky a súhrnný report',
+      totalMeasurements: 'Celkom meraní',
+      outOfSpec: 'Mimo špecifikácie',
+      inSpec: 'V špecifikácii',
+      locations: 'Lokality',
+      measurementsByType: 'Merania podľa typu',
+      topLocations: 'Top 5 lokalít',
+      recentTrends: 'Posledné trendy',
+    },
     specifications: {
       title: 'ISO normy a špecifikácie',
       description: 'Spravujte ISO normy a špecifikácie pre jednotlivé typy meraní',
@@ -522,6 +542,16 @@ export const translations = {
     limits: {
       title: 'Grenzwerte festlegen',
       save: 'Grenzwerte speichern',
+    },
+    statistics: {
+      title: 'Statistiken & Übersichtsbericht',
+      totalMeasurements: 'Gesamtmessungen',
+      outOfSpec: 'Außerhalb der Spezifikation',
+      inSpec: 'Innerhalb der Spezifikation',
+      locations: 'Standorte',
+      measurementsByType: 'Messungen nach Typ',
+      topLocations: 'Top 5 Standorte',
+      recentTrends: 'Aktuelle Trends',
     },
     specifications: {
       title: 'ISO-Normen & Spezifikationen',
