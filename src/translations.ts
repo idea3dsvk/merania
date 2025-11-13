@@ -127,7 +127,7 @@ export const translations = {
       dustiness_iso5: 'Dustiness ISO5',
       torque: 'Screwdriver Torque',
       surface_resistance: 'Surface Resistance (Rtt)',
-      grounding_resistance: 'Grounding Resistance (Rg)',
+      grounding_resistance: 'Grounding Resistance (Rtg)',
       ionizer: 'Ionizer Performance',
     },
     // data.service
@@ -324,7 +324,7 @@ export const translations = {
       dustiness_iso5: 'Prašnosť ISO5',
       torque: 'Krútiaci moment skrutkovača',
       surface_resistance: 'Povrchový odpor (Rtt)',
-      grounding_resistance: 'Odpor uzemnenia (Rg)',
+      grounding_resistance: 'Odpor uzemnenia (Rtg)',
       ionizer: 'Výkon ionizátora',
     },
     alerts: {
@@ -519,7 +519,7 @@ export const translations = {
       dustiness_iso5: 'Staubbelastung ISO5',
       torque: 'Schrauberdrehmoment',
       surface_resistance: 'Oberflächenwiderstand (Rtt)',
-      grounding_resistance: 'Erdungswiderstand (Rg)',
+      grounding_resistance: 'Erdungswiderstand (Rtg)',
       ionizer: 'Ionisatorleistung',
     },
     alerts: {
