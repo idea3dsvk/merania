@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { SpecificationsService } from '../../services/specifications.service';
 import { TranslationService } from '../../services/translation.service';
+import { AuthService } from '../../services/auth.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { MeasurementType, MEASUREMENT_TYPES, ISOSpecification } from '../../models';
 
@@ -15,6 +16,7 @@ import { MeasurementType, MEASUREMENT_TYPES, ISOSpecification } from '../../mode
 export class SpecificationsViewComponent {
   private specificationsService = inject(SpecificationsService);
   private translationService = inject(TranslationService);
+  private authService = inject(AuthService);
   private fb = inject(FormBuilder);
 
   specifications = this.specificationsService.specifications;
@@ -64,6 +66,10 @@ export class SpecificationsViewComponent {
 
   getMeasurementTypeName(type: MeasurementType): string {
     return this.translationService.translate(`measurementNames.${type}`);
+  }
+
+  canEditSpecifications(): boolean {
+    return this.authService.canEditSpecifications();
   }
 
   deleteSpecification(type: MeasurementType) {

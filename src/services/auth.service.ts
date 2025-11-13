@@ -214,4 +214,12 @@ export class AuthService {
   canAddOrEdit(): boolean {
     return this.isAuthenticated();
   }
+
+  /**
+   * Check if current user can edit/delete specifications
+   * Only admin can edit/delete specifications
+   */
+  canEditSpecifications(): boolean {
+    return this.isAdmin();
+  }
 }

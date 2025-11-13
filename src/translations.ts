@@ -178,6 +178,7 @@ export const translations = {
       delete: 'Delete',
       editTitle: 'Edit Specification',
       confirmDelete: 'Are you sure you want to delete this specification?',
+      viewOnly: 'View only',
     },
     pdf: {
       reportTitle: 'Workplace Measurements Report',
@@ -373,6 +374,7 @@ export const translations = {
       delete: 'Vymazať',
       editTitle: 'Upraviť špecifikáciu',
       confirmDelete: 'Naozaj chcete vymazať túto špecifikáciu?',
+      viewOnly: 'Iba na prezeranie',
     },
     pdf: {
       reportTitle: 'Správa o meraniach na pracovisku',
@@ -568,6 +570,7 @@ export const translations = {
       delete: 'Löschen',
       editTitle: 'Spezifikation bearbeiten',
       confirmDelete: 'Möchten Sie diese Spezifikation wirklich löschen?',
+      viewOnly: 'Nur ansehen',
     },
     pdf: {
       reportTitle: 'Bericht über Arbeitsplatzmessungen',
