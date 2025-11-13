@@ -162,6 +162,7 @@ export const translations = {
       measurementsByType: 'Measurements by Type',
       topLocations: 'Top 5 Locations',
       recentTrends: 'Recent Trends',
+      trendInfo: 'Trends compare the last 30 days with the previous 30 days',
     },
     specifications: {
       title: 'ISO Standards & Specifications',
@@ -358,6 +359,7 @@ export const translations = {
       measurementsByType: 'Merania podľa typu',
       topLocations: 'Top 5 lokalít',
       recentTrends: 'Posledné trendy',
+      trendInfo: 'Trendy porovnávajú posledných 30 dní s predchádzajúcimi 30 dňami',
     },
     specifications: {
       title: 'ISO normy a špecifikácie',
@@ -554,6 +556,7 @@ export const translations = {
       measurementsByType: 'Messungen nach Typ',
       topLocations: 'Top 5 Standorte',
       recentTrends: 'Aktuelle Trends',
+      trendInfo: 'Trends vergleichen die letzten 30 Tage mit den vorherigen 30 Tagen',
     },
     specifications: {
       title: 'ISO-Normen & Spezifikationen',
