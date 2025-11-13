@@ -1,0 +1,187 @@
+<div class="max-w-6xl mx-auto">
+  <!-- Import Section -->
+  <div class="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-6">
+    <div class="flex items-center mb-4">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-indigo-600" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+      </svg>
+      <h2 class="text-xl sm:text-2xl font-semibold text-gray-800">{{ 'importExport.importTitle' | translate }}</h2>
+    </div>
+
+    @if (!isAdmin()) {
+      <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4">
+        <div class="flex">
+          <svg class="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+          </svg>
+          <p class="ml-3 text-sm text-yellow-700">{{ 'importExport.adminOnly' | translate }}</p>
+        </div>
+      </div>
+    } @else {
+      <div class="space-y-4">
+        <p class="text-gray-600">{{ 'importExport.importDescription' | translate }}</p>
+
+        <!-- File upload -->
+        <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-indigo-400 transition-colors">
+          <input 
+            type="file" 
+            id="fileInput" 
+            accept=".csv,.xlsx,.xls"
+            (change)="onFileSelected($event)"
+            [disabled]="importing()"
+            class="hidden"
+          />
+          <label 
+            for="fileInput" 
+            class="cursor-pointer"
+            [class.opacity-50]="importing()"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+            </svg>
+            <p class="mt-2 text-sm text-gray-600">
+              {{ 'importExport.clickToUpload' | translate }}
+            </p>
+            <p class="mt-1 text-xs text-gray-500">CSV, XLSX, XLS</p>
+          </label>
+        </div>
+
+        <!-- Import status -->
+        @if (importStatus()) {
+          <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <p class="text-sm text-blue-700">{{ importStatus() }}</p>
+            @if (importing() && importTotal() > 0) {
+              <div class="mt-2">
+                <div class="flex justify-between text-xs text-blue-600 mb-1">
+                  <span>{{ importProgress() }} / {{ importTotal() }}</span>
+                  <span>{{ (importProgress() / importTotal() * 100).toFixed(0) }}%</span>
+                </div>
+                <div class="w-full bg-blue-200 rounded-full h-2">
+                  <div 
+                    class="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                    [style.width.%]="importProgress() / importTotal() * 100"
+                  ></div>
+                </div>
+              </div>
+            }
+          </div>
+        }
+
+        <!-- Import button -->
+        <button
+          (click)="importData()"
+          [disabled]="!canImport()"
+          class="w-full sm:w-auto px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors font-medium"
+        >
+          @if (importing()) {
+            <span class="flex items-center justify-center">
+              <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              {{ 'importExport.importing' | translate }}
+            </span>
+          } @else {
+            {{ 'importExport.importButton' | translate }}
+          }
+        </button>
+
+        <!-- Format help -->
+        <details class="mt-4">
+          <summary class="cursor-pointer text-sm text-indigo-600 hover:text-indigo-800">
+            {{ 'importExport.formatHelp' | translate }}
+          </summary>
+          <div class="mt-2 text-xs text-gray-600 bg-gray-50 p-3 rounded">
+            <p class="font-semibold mb-2">{{ 'importExport.requiredColumns' | translate }}:</p>
+            <ul class="list-disc list-inside space-y-1">
+              <li><code>date</code> - {{ 'importExport.dateColumn' | translate }}</li>
+              <li><code>location</code> - {{ 'importExport.locationColumn' | translate }}</li>
+              <li><code>temperature</code>, <code>humidity</code> - {{ 'importExport.tempHumColumn' | translate }}</li>
+              <li><code>luminosity</code>, <code>dustParticles</code>, etc.</li>
+            </ul>
+          </div>
+        </details>
+      </div>
+    }
+  </div>
+
+  <!-- Export Section -->
+  <div class="bg-white rounded-lg shadow-md p-4 sm:p-6">
+    <div class="flex items-center mb-4">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-green-600" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
+      </svg>
+      <h2 class="text-xl sm:text-2xl font-semibold text-gray-800">{{ 'importExport.exportTitle' | translate }}</h2>
+    </div>
+
+    @if (!isAdmin()) {
+      <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4">
+        <div class="flex">
+          <svg class="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+          </svg>
+          <p class="ml-3 text-sm text-yellow-700">{{ 'importExport.adminOnly' | translate }}</p>
+        </div>
+      </div>
+    } @else {
+      <div class="space-y-4">
+        <p class="text-gray-600">{{ 'importExport.exportDescription' | translate }}</p>
+
+        <!-- Export stats -->
+        <div class="grid grid-cols-1 sm:grid-cols-1 gap-4">
+          <div class="bg-indigo-50 rounded-lg p-4 text-center">
+            <p class="text-sm text-indigo-600 font-medium">{{ 'importExport.measurements' | translate }}</p>
+            <p class="text-3xl font-bold text-indigo-900">{{ dataService.measurements().length }}</p>
+            <p class="text-xs text-indigo-500 mt-1">Total records available for export</p>
+          </div>
+        </div>
+
+        <!-- Export buttons -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <button
+            (click)="exportDatabase()"
+            [disabled]="exporting()"
+            class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors font-medium flex items-center justify-center"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+            </svg>
+            {{ 'importExport.exportExcel' | translate }}
+          </button>
+
+          <button
+            (click)="exportCSV()"
+            [disabled]="exporting()"
+            class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors font-medium flex items-center justify-center"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+            </svg>
+            {{ 'importExport.exportCSV' | translate }}
+          </button>
+
+          <button
+            (click)="exportJSON()"
+            [disabled]="exporting()"
+            class="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors font-medium flex items-center justify-center"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+            </svg>
+            {{ 'importExport.exportJSON' | translate }}
+          </button>
+        </div>
+
+        <!-- Export info -->
+        <div class="bg-gray-50 rounded-lg p-4 text-sm text-gray-600">
+          <p class="font-semibold mb-2">{{ 'importExport.exportInfo' | translate }}:</p>
+          <ul class="list-disc list-inside space-y-1">
+            <li><strong>Excel (XLSX)</strong>: {{ 'importExport.excelInfo' | translate }}</li>
+            <li><strong>CSV</strong>: {{ 'importExport.csvInfo' | translate }}</li>
+            <li><strong>JSON</strong>: {{ 'importExport.jsonInfo' | translate }}</li>
+          </ul>
+        </div>
+      </div>
+    }
+  </div>
+</div>
