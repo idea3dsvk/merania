@@ -61,12 +61,12 @@ Po dokončení deploymenu bude aplikácia dostupná na:
 **Administrator** (plný prístup):
 
 - Email: `auotns@gmail.com`
-- Heslo: `11238558`
+- Heslo: `na poziadanie`
 
 **Moderátor** (obmedzený prístup):
 
 - Email: `moderator@auo.com`
-- Heslo: `AUOmoderator`
+- Heslo: `na poziadanie`
 
 ---
 
