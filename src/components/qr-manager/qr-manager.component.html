@@ -1,0 +1,175 @@
+<div class="max-w-7xl mx-auto">
+  <!-- Header -->
+  <div class="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-6">
+    <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+        </svg>
+        <h2 class="text-xl sm:text-2xl font-semibold text-gray-800">{{ 'qrManager.title' | translate }}</h2>
+      </div>
+      
+      @if (isAdmin()) {
+        <button
+          (click)="openAddDialog()"
+          class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium flex items-center"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+          </svg>
+          {{ 'qrManager.createNew' | translate }}
+        </button>
+      }
+    </div>
+
+    @if (!isAdmin()) {
+      <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4">
+        <div class="flex">
+          <svg class="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+          </svg>
+          <p class="ml-3 text-sm text-yellow-700">{{ 'qrManager.adminOnly' | translate }}</p>
+        </div>
+      </div>
+    } @else {
+      <p class="text-gray-600">{{ 'qrManager.description' | translate }}</p>
+    }
+  </div>
+
+  @if (isAdmin()) {
+    <!-- QR Locations Grid -->
+    @if (locations().length === 0) {
+      <div class="bg-white rounded-lg shadow-md p-12 text-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+        </svg>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">{{ 'qrManager.noLocations' | translate }}</h3>
+        <p class="text-gray-500 mb-4">{{ 'qrManager.createFirstQR' | translate }}</p>
+        <button
+          (click)="openAddDialog()"
+          class="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+        >
+          {{ 'qrManager.createNew' | translate }}
+        </button>
+      </div>
+    } @else {
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        @for (location of locations(); track location.id) {
+          <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            <!-- QR Code Image -->
+            @if (location.qrCodeDataUrl) {
+              <div class="bg-gray-50 p-6 flex items-center justify-center">
+                <img [src]="location.qrCodeDataUrl" [alt]="'QR Code for ' + location.name" class="w-64 h-64" />
+              </div>
+            }
+            
+            <!-- Location Info -->
+            <div class="p-4">
+              <h3 class="text-lg font-semibold text-gray-900 mb-1">{{ location.name }}</h3>
+              <p class="text-sm text-gray-600 mb-3">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                  {{ getMeasurementTypeName(location.measurementType) }}
+                </span>
+              </p>
+              <p class="text-xs text-gray-500 mb-4">
+                {{ 'qrManager.created' | translate }}: {{ location.created | date:'short' }}
+              </p>
+
+              <!-- Actions -->
+              <div class="flex flex-wrap gap-2">
+                <button
+                  (click)="downloadQR(location)"
+                  class="flex-1 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium flex items-center justify-center"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
+                  </svg>
+                  {{ 'qrManager.download' | translate }}
+                </button>
+                <button
+                  (click)="printQR(location)"
+                  class="flex-1 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium flex items-center justify-center"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0 002 2h1v2a2 2 0 002 2h6a2 2 0 002-2v-2h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z" clip-rule="evenodd" />
+                  </svg>
+                  {{ 'qrManager.print' | translate }}
+                </button>
+                <button
+                  (click)="deleteLocation(location)"
+                  class="px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
+                  [attr.aria-label]="'Delete ' + location.name"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  }
+
+  <!-- Add Location Dialog -->
+  @if (showAddDialog()) {
+    <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" (click)="closeAddDialog()">
+      <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6" (click)="$event.stopPropagation()">
+        <h3 class="text-xl font-semibold text-gray-900 mb-4">{{ 'qrManager.createNew' | translate }}</h3>
+        
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              {{ 'qrManager.locationName' | translate }}
+            </label>
+            <input
+              type="text"
+              [(ngModel)]="newLocationName"
+              [placeholder]="'qrManager.locationNamePlaceholder' | translate"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              {{ 'qrManager.measurementType' | translate }}
+            </label>
+            <select
+              [(ngModel)]="newLocationType"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            >
+              @for (type of measurementTypes; track type) {
+                <option [value]="type">{{ getMeasurementTypeName(type) }}</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <div class="flex gap-3 mt-6">
+          <button
+            (click)="closeAddDialog()"
+            class="flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors font-medium"
+          >
+            {{ 'qrManager.cancel' | translate }}
+          </button>
+          <button
+            (click)="createQRLocation()"
+            [disabled]="generating() || !newLocationName().trim()"
+            class="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors font-medium flex items-center justify-center"
+          >
+            @if (generating()) {
+              <svg class="animate-spin h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              {{ 'qrManager.generating' | translate }}
+            } @else {
+              {{ 'qrManager.create' | translate }}
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>
