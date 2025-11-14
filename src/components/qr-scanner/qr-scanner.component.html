@@ -1,0 +1,70 @@
+<div class="scanner-header">
+  <h1>{{ 'header.qrScanner' | translate }}</h1>
+  <p>{{ 'qrScanner.description' | translate }}</p>
+</div>
+
+<div class="scanner-container">
+  @if (showPermissionHelp()) {
+    <div class="camera-permissions">
+      <h3>📷 {{ 'qrScanner.permissionRequired' | translate }}</h3>
+      <p>{{ 'qrScanner.permissionHelp' | translate }}</p>
+      <ul>
+        <li>{{ 'qrScanner.permissionStep1' | translate }}</li>
+        <li>{{ 'qrScanner.permissionStep2' | translate }}</li>
+        <li>{{ 'qrScanner.permissionStep3' | translate }}</li>
+      </ul>
+    </div>
+  }
+
+  @if (errorMessage()) {
+    <div class="error-message">
+      ⚠️ {{ errorMessage() }}
+    </div>
+  }
+
+  @if (!scannedData() && scannerActive()) {
+    <div class="instructions">
+      <h3>{{ 'qrScanner.instructions' | translate }}</h3>
+      <ul>
+        <li>{{ 'qrScanner.instruction1' | translate }}</li>
+        <li>{{ 'qrScanner.instruction2' | translate }}</li>
+        <li>{{ 'qrScanner.instruction3' | translate }}</li>
+      </ul>
+    </div>
+  }
+
+  <div id="qr-reader"></div>
+
+  @if (scannedData()) {
+    <div class="scanned-data">
+      <h3>
+        <span>✓</span>
+        {{ 'qrScanner.scanSuccess' | translate }}
+      </h3>
+      
+      <div class="scanned-data-item">
+        <span class="scanned-data-label">{{ 'qrScanner.location' | translate }}:</span>
+        <span class="scanned-data-value">{{ scannedData()!.location }}</span>
+      </div>
+
+      <div class="scanned-data-item">
+        <span class="scanned-data-label">{{ 'qrScanner.measurementType' | translate }}:</span>
+        <span class="scanned-data-value">{{ getMeasurementTypeName(scannedData()!.type) }}</span>
+      </div>
+
+      <div class="scanned-data-item">
+        <span class="scanned-data-label">{{ 'qrScanner.qrId' | translate }}:</span>
+        <span class="scanned-data-value">{{ scannedData()!.id.substring(0, 8) }}...</span>
+      </div>
+    </div>
+
+    <div class="action-buttons">
+      <button class="btn btn-primary" (click)="addMeasurement()">
+        {{ 'qrScanner.addMeasurement' | translate }}
+      </button>
+      <button class="btn btn-secondary" (click)="scanAgain()">
+        {{ 'qrScanner.scanAnother' | translate }}
+      </button>
+    </div>
+  }
+</div>
