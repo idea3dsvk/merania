@@ -253,34 +253,48 @@ export class DataService {
     this.toastService.success(this.translationService.translate('toast.exportedCSV'));
   }
 
+  private removeDiacritics(text: string): string {
+    return text
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '') // Remove diacritical marks
+      .replace(/Ω/g, 'Ohm') // Replace Omega symbol
+      .replace(/ω/g, 'ohm') // Replace omega symbol lowercase
+      .replace(/°/g, 'deg') // Replace degree symbol
+      .replace(/µ/g, 'u') // Replace micro symbol
+      .replace(/·/g, '.') // Replace middle dot
+      .replace(/[^\x00-\x7F]/g, ''); // Remove any remaining non-ASCII characters
+  }
+
   exportToPDF(data: Measurement[]) {
     if (data.length === 0) {
         this.toastService.warning(this.translationService.translate('alerts.noDataToExport'));
         return;
     }
     
-    const doc = new jsPDF();
+    // Create PDF in landscape orientation
+    const doc = new jsPDF('landscape');
     
-    doc.text(this.translationService.translate('pdf.reportTitle'), 14, 16);
+    const title = this.removeDiacritics(this.translationService.translate('pdf.reportTitle'));
+    doc.text(title, 14, 16);
 
-    const t = (key: string) => this.translationService.translate(key);
+    const t = (key: string) => this.removeDiacritics(this.translationService.translate(key));
 
     const tableData = data.map(m => {
         const base = [
             m.id.substring(0, 4),
             new Date(m.date).toLocaleString(),
             t(`measurementNames.${m.type}`),
-            m.location
+            this.removeDiacritics(m.location)
         ];
         switch (m.type) {
-            case 'temperature_humidity': return [...base, `${t('pdf.detailsPrefix.temp')}: ${m.temperature}°C (${m.limits.temperatureMin}-${m.limits.temperatureMax}), ${t('pdf.detailsPrefix.hum')}: ${m.humidity}% (${m.limits.humidityMin}-${m.limits.humidityMax})`];
-            case 'luminosity': return [...base, `${t('pdf.detailsPrefix.lum')}: ${m.luminosity}lx (${m.limits.min}-${m.limits.max})`];
-            case 'dustiness_iso6': return [...base, `0.5µm: ${m.particles_0_5um} (${m.limits.particles_0_5um_min}-${m.limits.particles_0_5um_max}), 5µm: ${m.particles_5um} (${m.limits.particles_5um_min}-${m.limits.particles_5um_max})`];
-            case 'dustiness_iso5': return [...base, `0.5µm: ${m.particles_0_5um} (${m.limits.particles_0_5um_min}-${m.limits.particles_0_5um_max}), 5µm: ${m.particles_5um} (${m.limits.particles_5um_min}-${m.limits.particles_5um_max})`];
-            case 'torque': return [...base, `${t('pdf.detailsPrefix.id')}: ${m.screwdriverId}, ${t('pdf.detailsPrefix.val')}: ${m.torqueValue}Nm (${m.limits.min}-${m.limits.max})`];
-            case 'surface_resistance': return [...base, `${t('pdf.detailsPrefix.mat')}: ${m.material}, ${t('pdf.detailsPrefix.r')}: ${m.resistance}Ω (${m.limits.min}-${m.limits.max})`];
-            case 'grounding_resistance': return [...base, `${t('pdf.detailsPrefix.point')}: ${m.pointId}, ${t('pdf.detailsPrefix.r')}: ${m.resistance}Ω (${m.limits.min}-${m.limits.max})`];
-            case 'ionizer': return [...base, `${t('pdf.detailsPrefix.id')}: ${m.ionizerId}, ${t('pdf.detailsPrefix.bal')}: ${m.balance}V, ${t('pdf.detailsPrefix.dPositive')}: ${m.decayTimePositive}s, ${t('pdf.detailsPrefix.dNegative')}: ${m.decayTimeNegative}s`];
+            case 'temperature_humidity': return [...base, this.removeDiacritics(`${t('pdf.detailsPrefix.temp')}: ${m.temperature}deg (${m.limits.temperatureMin}-${m.limits.temperatureMax}), ${t('pdf.detailsPrefix.hum')}: ${m.humidity}% (${m.limits.humidityMin}-${m.limits.humidityMax})`)];
+            case 'luminosity': return [...base, this.removeDiacritics(`${t('pdf.detailsPrefix.lux')}: ${m.luminosity}lx (${m.limits.min}-${m.limits.max})`)];
+            case 'dustiness_iso6': return [...base, this.removeDiacritics(`0.5u: ${m.particles_0_5um} (${m.limits.particles_0_5um_min}-${m.limits.particles_0_5um_max}), 5u: ${m.particles_5um} (${m.limits.particles_5um_min}-${m.limits.particles_5um_max})`)];
+            case 'dustiness_iso5': return [...base, this.removeDiacritics(`0.5u: ${m.particles_0_5um} (${m.limits.particles_0_5um_min}-${m.limits.particles_0_5um_max}), 5u: ${m.particles_5um} (${m.limits.particles_5um_min}-${m.limits.particles_5um_max})`)];
+            case 'torque': return [...base, this.removeDiacritics(`${t('pdf.detailsPrefix.id')}: ${m.screwdriverId}, ${t('pdf.detailsPrefix.val')}: ${m.torqueValue}Nm (${m.limits.min}-${m.limits.max})`)];
+            case 'surface_resistance': return [...base, this.removeDiacritics(`${t('pdf.detailsPrefix.mat')}: ${m.material}, ${t('pdf.detailsPrefix.r')}: ${m.resistance}Ohm (${m.limits.min}-${m.limits.max})`)];
+            case 'grounding_resistance': return [...base, this.removeDiacritics(`${t('pdf.detailsPrefix.point')}: ${m.pointId}, ${t('pdf.detailsPrefix.r')}: ${m.resistance}Ohm (${m.limits.min}-${m.limits.max})`)];
+            case 'ionizer': return [...base, this.removeDiacritics(`${t('pdf.detailsPrefix.id')}: ${m.ionizerId}, ${t('pdf.detailsPrefix.bal')}: ${m.balance}V, ${t('pdf.detailsPrefix.dPositive')}: ${m.decayTimePositive}s, ${t('pdf.detailsPrefix.dNegative')}: ${m.decayTimeNegative}s`)];
             default: return base;
         }
     });
