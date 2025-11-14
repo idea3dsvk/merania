@@ -251,7 +251,13 @@ export class QRScannerComponent implements OnDestroy {
     // Show only camera option, hide file upload
     showTorchButtonIfSupported: true,
     // Support all available formats
-    supportedScanTypes: undefined
+    supportedScanTypes: undefined,
+    // File-based scanning settings
+    showFileUploadSection: true,
+    // Experimental features for better detection
+    experimentalFeatures: {
+      useBarCodeDetectorIfSupported: true
+    }
   };
 
   ngOnInit() {
@@ -331,18 +337,28 @@ export class QRScannerComponent implements OnDestroy {
     }
   }
 
-  private onScanError(errorMessage: string) {
+  private onScanError(errorMessage: string | Error) {
+    // Convert to string if it's an Error object
+    const errMsg = typeof errorMessage === 'string' 
+      ? errorMessage 
+      : errorMessage?.message || String(errorMessage);
+    
     // Ignore common scanning errors (happens frequently during scanning)
     // Only log critical errors
-    if (errorMessage.includes('NotFoundException') || 
-        errorMessage.includes('NotFoundError')) {
+    if (errMsg.includes('NotFoundException') || 
+        errMsg.includes('NotFoundError') ||
+        errMsg.includes('No MultiFormat Readers')) {
+      // This is normal - just means QR code not detected in current frame
       return;
     }
     
-    if (errorMessage.includes('NotAllowedError') || 
-        errorMessage.includes('PermissionDenied')) {
+    if (errMsg.includes('NotAllowedError') || 
+        errMsg.includes('PermissionDenied')) {
       this.showPermissionHelp.set(true);
     }
+    
+    // Log other errors for debugging
+    console.warn('QR Scanner error:', errMsg);
   }
 
   addMeasurement() {
