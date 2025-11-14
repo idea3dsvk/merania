@@ -43,12 +43,15 @@ export class QRManagerComponent implements OnInit {
 
   private readonly STORAGE_KEY = 'qr-locations';
 
-  ngOnInit() {
-    // Initialize locations from dataService which syncs with Firebase
-    // We'll keep our local copy but it will be updated by dataService
+  constructor() {
+    // Set up reactive effect to sync with dataService
     effect(() => {
       this.locations.set(this.dataService.qrLocations());
     });
+  }
+
+  ngOnInit() {
+    // Effect is already set up in constructor
   }
 
   openAddDialog(): void {
