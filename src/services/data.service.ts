@@ -334,6 +334,14 @@ export class DataService {
       metadata,
     };
 
+    // Update local signal immediately
+    this._auditLogs.update(logs => {
+      const updated = [...logs, auditLog].sort((a, b) => 
+        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+      );
+      return updated;
+    });
+
     // Save to Firebase if available
     if (this.firebaseService.isFirebaseAvailable()) {
       try {
@@ -342,6 +350,8 @@ export class DataService {
       } catch (error) {
         console.error('Failed to save audit log:', error);
       }
+    } else {
+      console.log('Audit log created locally (Firebase not available):', auditLog.id);
     }
   }
 
