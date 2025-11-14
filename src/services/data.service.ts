@@ -261,6 +261,14 @@ export class DataService {
         this.toastService.warning(this.translationService.translate('alerts.noDataToExport'));
         return;
     }
+    
+    // Check if jsPDF is available
+    if (typeof jspdf === 'undefined' || !jspdf.jsPDF) {
+        this.toastService.error('PDF library not loaded. Please refresh the page.');
+        console.error('jsPDF library not found');
+        return;
+    }
+    
     const { jsPDF } = jspdf;
     const doc = new jsPDF();
     
@@ -287,6 +295,13 @@ export class DataService {
             default: return base;
         }
     });
+
+    // Check if autoTable is available
+    if (typeof autoTable === 'undefined') {
+        this.toastService.error('PDF table library not loaded. Please refresh the page.');
+        console.error('jsPDF autoTable plugin not found');
+        return;
+    }
 
     autoTable(doc, {
         head: [[t('pdf.headers.id'), t('pdf.headers.date'), t('pdf.headers.type'), t('pdf.headers.location'), t('pdf.headers.details')]],
