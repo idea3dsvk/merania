@@ -166,7 +166,8 @@
               <td class="px-3 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500 max-w-xs truncate hidden xl:table-cell">{{ item.notes }}</td>
               <td class="px-3 sm:px-6 py-4 whitespace-nowrap text-center">
                 <button 
-                  (click)="openEditModal(item)" 
+                  (click)="openEditModal(item); $event.stopPropagation()" 
+                  type="button"
                   class="text-indigo-600 hover:text-indigo-900 mr-2 sm:mr-3 p-1"
                   title="Edit"
                 >
@@ -176,7 +177,8 @@
                 </button>
                 @if (canDelete()) {
                   <button 
-                    (click)="openDeleteConfirm(item.id)" 
+                    (click)="openDeleteConfirm(item.id); $event.stopPropagation()" 
+                    type="button"
                     class="text-red-600 hover:text-red-900 p-1"
                     title="Delete"
                   >
