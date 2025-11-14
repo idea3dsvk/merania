@@ -18,13 +18,13 @@ V Firebase Console → Authentication → Users:
 #### Vytvor Admin účet:
 1. Klikni **"Add user"**
 2. Email: `auotns@gmail.com`
-3. Password: `11238558`
+3. Password: `xxxxxxxx`
 4. Klikni **"Add user"**
 
 #### Vytvor Moderátor účet:
 1. Klikni **"Add user"**
 2. Email: `moderator@auo.com`
-3. Password: `AUOmoderator`
+3. Password: `xxxxxxxx`
 4. Klikni **"Add user"**
 
 ---
@@ -133,11 +133,11 @@ Po nasadení aplikácie:
 1. Otvor: https://idea3dsvk.github.io/merania/
 2. Prihlás sa s admin účtom:
    - Email: `auotns@gmail.com`
-   - Password: `11238558`
+   - Password: `xxxxxxxxx`
 3. Otestuj funkcie (pridaj meranie, uprav limit, zmaž meranie)
 4. Odhlás sa a prihlás ako moderátor:
    - Email: `moderator@auo.com`
-   - Password: `AUOmoderator`
+   - Password: `xxxxxxxxx`
 5. Over, že moderátor NEMÔŽE mazať merania ani upravovať limity
 
 ---
