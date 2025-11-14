@@ -48,12 +48,108 @@ export class ImportExportComponent {
   }
 
   async importData(): Promise<void> {
-    this.importStatus.set('Import feature coming soon! Currently only export is available.');
-    setTimeout(() => {
-      this.fileSelected.set(false);
-      this.selectedFile.set(null);
-      this.importStatus.set('');
-    }, 3000);
+    const file = this.selectedFile();
+    if (!file || !this.isAdmin()) return;
+
+    this.importing.set(true);
+    this.importStatus.set('Processing file...');
+    this.importProgress.set(0);
+
+    try {
+      const fileExtension = file.name.toLowerCase().split('.').pop();
+      
+      if (fileExtension === 'json') {
+        await this.importJSON(file);
+      } else if (fileExtension === 'csv') {
+        this.importStatus.set('CSV import coming soon! Please use JSON format.');
+        setTimeout(() => {
+          this.fileSelected.set(false);
+          this.selectedFile.set(null);
+          this.importStatus.set('');
+          this.importing.set(false);
+        }, 3000);
+      } else if (fileExtension === 'xlsx' || fileExtension === 'xls') {
+        this.importStatus.set('Excel import coming soon! Please use JSON format.');
+        setTimeout(() => {
+          this.fileSelected.set(false);
+          this.selectedFile.set(null);
+          this.importStatus.set('');
+          this.importing.set(false);
+        }, 3000);
+      } else {
+        throw new Error('Unsupported file format. Please use JSON format.');
+      }
+    } catch (error) {
+      console.error('Import error:', error);
+      this.importStatus.set('Import failed: ' + (error instanceof Error ? error.message : 'Unknown error'));
+      setTimeout(() => {
+        this.fileSelected.set(false);
+        this.selectedFile.set(null);
+        this.importStatus.set('');
+        this.importing.set(false);
+      }, 5000);
+    }
+  }
+
+  private async importJSON(file: File): Promise<void> {
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text);
+
+      // Validate JSON structure
+      if (!data.measurements || !Array.isArray(data.measurements)) {
+        throw new Error('Invalid JSON format. Expected { measurements: [...] }');
+      }
+
+      const measurements = data.measurements as Measurement[];
+      this.importTotal.set(measurements.length);
+
+      if (measurements.length === 0) {
+        throw new Error('No measurements found in file');
+      }
+
+      // Validate each measurement has required fields
+      for (let i = 0; i < measurements.length; i++) {
+        const m = measurements[i];
+        if (!m.type || !m.date || !m.location) {
+          throw new Error(`Invalid measurement at index ${i}: missing required fields (type, date, location)`);
+        }
+      }
+
+      this.importStatus.set(`Importing ${measurements.length} measurements...`);
+
+      // Import in batches of 50
+      const batchSize = 50;
+      let imported = 0;
+
+      for (let i = 0; i < measurements.length; i += batchSize) {
+        const batch = measurements.slice(i, i + batchSize);
+        
+        // Add each measurement
+        for (const measurement of batch) {
+          await this.dataService.addMeasurement(measurement);
+          imported++;
+          this.importProgress.set(imported);
+        }
+
+        // Update progress
+        this.importStatus.set(`Imported ${imported} of ${measurements.length} measurements...`);
+      }
+
+      // Success
+      this.importStatus.set(`✓ Successfully imported ${imported} measurements!`);
+      setTimeout(() => {
+        this.fileSelected.set(false);
+        this.selectedFile.set(null);
+        this.importStatus.set('');
+        this.importing.set(false);
+        this.importProgress.set(0);
+        this.importTotal.set(0);
+      }, 3000);
+
+    } catch (error) {
+      throw error;
+    }
   }
 
   private getMeasurementValue(m: Measurement, field: string): string {
