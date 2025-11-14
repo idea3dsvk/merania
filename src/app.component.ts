@@ -6,6 +6,7 @@ import { StatisticsComponent } from './components/statistics/statistics.componen
 import { SpecificationsViewComponent } from './components/specifications-view/specifications-view.component';
 import { TrendChartsComponent } from './components/trend-charts/trend-charts.component';
 import { ImportExportComponent } from './components/import-export/import-export.component';
+import { AuditTrailComponent } from './components/audit-trail/audit-trail.component';
 import { LoginComponent } from './components/login/login.component';
 import { ToastComponent } from './components/toast/toast.component';
 import { TranslatePipe } from './pipes/translate.pipe';
@@ -20,12 +21,12 @@ import { concat, interval } from 'rxjs';
   selector: 'app-root',
   templateUrl: './app.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, DashboardComponent, HistoryViewComponent, StatisticsComponent, SpecificationsViewComponent, TrendChartsComponent, ImportExportComponent, LoginComponent, ToastComponent, TranslatePipe],
+  imports: [CommonModule, DashboardComponent, HistoryViewComponent, StatisticsComponent, SpecificationsViewComponent, TrendChartsComponent, ImportExportComponent, AuditTrailComponent, LoginComponent, ToastComponent, TranslatePipe],
 })
 export class AppComponent {
   private swUpdate = inject(SwUpdate);
   private appRef = inject(ApplicationRef);
-  activeView = signal<'dashboard' | 'history' | 'statistics' | 'charts' | 'importExport' | 'specifications'>('dashboard');
+  activeView = signal<'dashboard' | 'history' | 'statistics' | 'charts' | 'importExport' | 'auditTrail' | 'specifications'>('dashboard');
   mobileMenuOpen = signal<boolean>(false);
   translationService = inject(TranslationService);
   authService = inject(AuthService);
@@ -55,7 +56,7 @@ export class AppComponent {
     }
   }
 
-  setView(view: 'dashboard' | 'history' | 'statistics' | 'charts' | 'importExport' | 'specifications'): void {
+  setView(view: 'dashboard' | 'history' | 'statistics' | 'charts' | 'importExport' | 'auditTrail' | 'specifications'): void {
     this.activeView.set(view);
     // Close mobile menu when navigating
     this.mobileMenuOpen.set(false);

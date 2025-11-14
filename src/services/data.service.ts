@@ -1,9 +1,10 @@
 import { Injectable, signal, inject } from '@angular/core';
-import { Measurement } from '../models';
+import { Measurement, AuditLog, AuditAction, AuditEntityType, AuditChange } from '../models';
 import { TranslationService } from './translation.service';
 import { ToastService } from './toast.service';
 import { ErrorHandlerService } from './error-handler.service';
 import { FirebaseService } from './firebase.service';
+import { AuthService } from './auth.service';
 
 // These declare statements are to inform TypeScript about global variables
 // loaded from CDNs in index.html
@@ -18,20 +19,26 @@ export class DataService {
   private toastService = inject(ToastService);
   private errorHandler = inject(ErrorHandlerService);
   private firebaseService = inject(FirebaseService);
+  private authService = inject(AuthService);
   private readonly STORAGE_KEY = 'workplace-measurements';
   private readonly COLLECTION_NAME = 'measurements';
+  private readonly AUDIT_COLLECTION = 'audit_logs';
   
   // This is a mock database. In a real application, you would replace this
   // with calls to a backend service like Firebase Firestore.
   private _measurements = signal<Measurement[]>(this.loadFromStorage());
+  private _auditLogs = signal<AuditLog[]>([]);
 
   public readonly measurements = this._measurements.asReadonly();
+  public readonly auditLogs = this._auditLogs.asReadonly();
 
   constructor() {
     // Save to localStorage whenever measurements change
     this.setupAutoSave();
     // Initialize Firebase sync
     this.initializeFirebaseSync();
+    // Initialize audit logs
+    this.initializeAuditLogs();
   }
 
   private async initializeFirebaseSync(): Promise<void> {
@@ -120,11 +127,18 @@ export class DataService {
       }
     }
 
+    // Log audit action
+    await this.logAuditAction('create', 'measurement', newMeasurement.id, undefined, {
+      measurementType: newMeasurement.type,
+      location: newMeasurement.location,
+    });
+
     console.log('Added new measurement:', newMeasurement);
     this.toastService.success(this.translationService.translate('toast.measurementAdded'));
   }
 
   async updateMeasurement(id: string, measurement: Omit<Measurement, 'id'>): Promise<void> {
+    const oldMeasurement = this._measurements().find(m => m.id === id);
     const updatedMeasurement = { ...measurement, id } as Measurement;
     
     this._measurements.update(m => {
@@ -146,10 +160,25 @@ export class DataService {
       }
     }
 
+    // Log audit action with changes
+    if (oldMeasurement) {
+      const changes: AuditChange[] = [];
+      Object.keys(updatedMeasurement).forEach(key => {
+        const oldVal = (oldMeasurement as any)[key];
+        const newVal = (updatedMeasurement as any)[key];
+        if (JSON.stringify(oldVal) !== JSON.stringify(newVal)) {
+          changes.push({ field: key, oldValue: oldVal, newValue: newVal });
+        }
+      });
+      await this.logAuditAction('update', 'measurement', id, changes);
+    }
+
     this.toastService.success(this.translationService.translate('toast.measurementUpdated'));
   }
 
   async deleteMeasurement(id: string): Promise<void> {
+    const deletedMeasurement = this._measurements().find(m => m.id === id);
+    
     this._measurements.update(m => {
       const updated = m.filter(measurement => measurement.id !== id);
       this.saveToStorage(updated);
@@ -165,6 +194,14 @@ export class DataService {
         console.error('Firebase delete error:', error);
         this.errorHandler.handleError(error as Error);
       }
+    }
+
+    // Log audit action
+    if (deletedMeasurement) {
+      await this.logAuditAction('delete', 'measurement', id, undefined, {
+        measurementType: deletedMeasurement.type,
+        location: deletedMeasurement.location,
+      });
     }
 
     this.toastService.success(this.translationService.translate('toast.measurementDeleted'));
@@ -241,5 +278,100 @@ export class DataService {
 
     doc.save(`measurements_report_${new Date().toISOString().slice(0,10)}.pdf`);
     this.toastService.success(this.translationService.translate('toast.exportedPDF'));
+  }
+
+  // Audit Trail Methods
+  private async initializeAuditLogs(): Promise<void> {
+    if (!this.firebaseService.isFirebaseAvailable()) {
+      console.log('Firebase not available, audit logs disabled');
+      return;
+    }
+
+    try {
+      // Load audit logs from Firebase
+      const auditData = await this.firebaseService.getCollection(this.AUDIT_COLLECTION);
+      if (auditData.length > 0) {
+        console.log('Loaded audit logs from Firebase:', auditData.length);
+        this._auditLogs.set(auditData as AuditLog[]);
+      }
+
+      // Subscribe to real-time updates
+      this.firebaseService.subscribeToCollection(
+        this.AUDIT_COLLECTION,
+        (data) => {
+          console.log('Audit logs real-time update:', data.length);
+          this._auditLogs.set(data as AuditLog[]);
+        }
+      );
+    } catch (error) {
+      console.error('Audit logs initialization error:', error);
+    }
+  }
+
+  private async logAuditAction(
+    action: AuditAction,
+    entityType: AuditEntityType,
+    entityId?: string,
+    changes?: AuditChange[],
+    metadata?: Record<string, any>
+  ): Promise<void> {
+    const user = this.authService.currentUser();
+    if (!user) {
+      console.warn('Cannot log audit action: no user logged in');
+      return;
+    }
+
+    const auditLog: AuditLog = {
+      id: crypto.randomUUID(),
+      timestamp: new Date().toISOString(),
+      userId: user.username,
+      userEmail: user.username,
+      userName: user.username,
+      action,
+      entityType,
+      entityId,
+      changes,
+      metadata,
+    };
+
+    // Save to Firebase if available
+    if (this.firebaseService.isFirebaseAvailable()) {
+      try {
+        await this.firebaseService.saveDocument(this.AUDIT_COLLECTION, auditLog.id, auditLog);
+        console.log('Audit log saved:', auditLog.id);
+      } catch (error) {
+        console.error('Failed to save audit log:', error);
+      }
+    }
+  }
+
+  async getAuditLogs(filters?: {
+    startDate?: string;
+    endDate?: string;
+    userId?: string;
+    action?: AuditAction;
+    entityType?: AuditEntityType;
+  }): Promise<AuditLog[]> {
+    let logs = this._auditLogs();
+
+    if (filters) {
+      if (filters.startDate) {
+        logs = logs.filter(log => log.timestamp >= filters.startDate!);
+      }
+      if (filters.endDate) {
+        logs = logs.filter(log => log.timestamp <= filters.endDate!);
+      }
+      if (filters.userId) {
+        logs = logs.filter(log => log.userId === filters.userId);
+      }
+      if (filters.action) {
+        logs = logs.filter(log => log.action === filters.action);
+      }
+      if (filters.entityType) {
+        logs = logs.filter(log => log.entityType === filters.entityType);
+      }
+    }
+
+    return logs.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
   }
 }

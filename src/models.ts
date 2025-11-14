@@ -121,3 +121,26 @@ export interface UserCredentials {
   username: string;
   password: string;
 }
+
+// Audit Trail
+export type AuditAction = 'create' | 'update' | 'delete' | 'login' | 'logout' | 'export' | 'import';
+export type AuditEntityType = 'measurement' | 'limit' | 'specification' | 'user' | 'system';
+
+export interface AuditLog {
+  id: string;
+  timestamp: string; // ISO date string
+  userId: string;
+  userEmail: string;
+  userName: string;
+  action: AuditAction;
+  entityType: AuditEntityType;
+  entityId?: string; // ID of the affected entity (measurement, specification, etc.)
+  changes?: AuditChange[]; // Details of what changed
+  metadata?: Record<string, any>; // Additional context (e.g., IP address, device info)
+}
+
+export interface AuditChange {
+  field: string;
+  oldValue: any;
+  newValue: any;
+}
