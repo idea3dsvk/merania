@@ -1,6 +1,6 @@
-import { Component, signal, inject, OnDestroy } from '@angular/core';
+import { Component, signal, inject, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Html5QrcodeScanner } from 'html5-qrcode';
+import { Html5Qrcode } from 'html5-qrcode';
 import { TranslationService } from '../../services/translation.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { MeasurementType } from '../../models';
@@ -229,7 +229,7 @@ interface ScannedQRData {
     }
   `]
 })
-export class QRScannerComponent implements OnDestroy {
+export class QRScannerComponent implements OnInit, OnDestroy {
   private translationService = inject(TranslationService);
   
   scannerActive = signal(false);
@@ -237,28 +237,8 @@ export class QRScannerComponent implements OnDestroy {
   errorMessage = signal<string | null>(null);
   showPermissionHelp = signal(false);
 
-  private scanner: Html5QrcodeScanner | null = null;
-  private scannerConfig = {
-    fps: 10,
-    qrbox: 250, // Use number instead of object for better compatibility
-    aspectRatio: 1.0,
-    disableFlip: false,
-    rememberLastUsedCamera: true,
-    // iOS specific settings
-    videoConstraints: {
-      facingMode: "environment" // Use back camera on mobile
-    },
-    // Show only camera option, hide file upload
-    showTorchButtonIfSupported: true,
-    // Support all available formats
-    supportedScanTypes: undefined,
-    // File-based scanning settings
-    showFileUploadSection: true,
-    // Experimental features for better detection
-    experimentalFeatures: {
-      useBarCodeDetectorIfSupported: true
-    }
-  };
+  private scanner: Html5Qrcode | null = null;
+  private readonly scannerId = 'qr-reader';
 
   ngOnInit() {
     this.startScanner();
@@ -268,37 +248,64 @@ export class QRScannerComponent implements OnDestroy {
     this.stopScanner();
   }
 
-  startScanner() {
+  async startScanner() {
     try {
       this.errorMessage.set(null);
       this.showPermissionHelp.set(false);
 
-      // Initialize scanner with verbose mode for debugging
-      this.scanner = new Html5QrcodeScanner(
-        'qr-reader',
-        this.scannerConfig,
-        true // verbose - will show more debug info
-      );
+      // Initialize Html5Qrcode
+      this.scanner = new Html5Qrcode(this.scannerId);
 
-      // Start scanning
-      this.scanner.render(
+      // Get cameras
+      const devices = await Html5Qrcode.getCameras();
+      
+      if (!devices || devices.length === 0) {
+        throw new Error('No cameras found');
+      }
+
+      // Use back camera on mobile (environment facing)
+      const cameraId = devices.find(d => d.label.toLowerCase().includes('back') || d.label.toLowerCase().includes('environment'))?.id 
+        || devices[devices.length - 1].id;
+
+      // Start scanning with the selected camera
+      await this.scanner.start(
+        cameraId,
+        {
+          fps: 10,
+          qrbox: { width: 250, height: 250 },
+          aspectRatio: 1.0,
+          disableFlip: false,
+          videoConstraints: {
+            facingMode: { ideal: "environment" }
+          }
+        },
         (decodedText) => this.onScanSuccess(decodedText),
-        (error) => this.onScanError(error)
+        (errorMessage) => this.onScanError(errorMessage)
       );
 
       this.scannerActive.set(true);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Scanner initialization error:', error);
-      this.errorMessage.set(
-        this.translationService.translate('qrScanner.cameraError')
-      );
-      this.showPermissionHelp.set(true);
+      
+      if (error?.name === 'NotAllowedError' || error?.message?.includes('Permission')) {
+        this.showPermissionHelp.set(true);
+        this.errorMessage.set(
+          this.translationService.translate('qrScanner.permissionRequired')
+        );
+      } else {
+        this.errorMessage.set(
+          this.translationService.translate('qrScanner.cameraError')
+        );
+      }
     }
   }
 
-  stopScanner() {
+  async stopScanner() {
     if (this.scanner) {
       try {
+        if (this.scanner.isScanning) {
+          await this.scanner.stop();
+        }
         this.scanner.clear();
         this.scanner = null;
       } catch (error) {
