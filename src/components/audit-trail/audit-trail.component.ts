@@ -23,7 +23,6 @@ export class AuditTrailComponent implements OnInit {
   // State
   loading = signal(false);
   exporting = signal(false);
-  auditLogs = signal<AuditLog[]>([]);
   
   // Filters
   filterStartDate = signal('');
@@ -40,10 +39,40 @@ export class AuditTrailComponent implements OnInit {
   // Computed
   isAdmin = computed(() => this.authService.currentUser()?.role === 'admin');
   
+  // Get audit logs directly from dataService
+  auditLogs = computed(() => this.dataService.auditLogs());
+  
   filteredLogs = computed(() => {
     let logs = this.auditLogs();
-    const search = this.searchTerm().toLowerCase();
     
+    // Apply date filters
+    if (this.filterStartDate()) {
+      const startDate = new Date(this.filterStartDate());
+      logs = logs.filter(log => new Date(log.timestamp) >= startDate);
+    }
+    if (this.filterEndDate()) {
+      const endDate = new Date(this.filterEndDate());
+      endDate.setHours(23, 59, 59, 999); // Include entire end date
+      logs = logs.filter(log => new Date(log.timestamp) <= endDate);
+    }
+    
+    // Apply user filter
+    if (this.filterUserId()) {
+      logs = logs.filter(log => log.userId === this.filterUserId());
+    }
+    
+    // Apply action filter
+    if (this.filterAction()) {
+      logs = logs.filter(log => log.action === this.filterAction());
+    }
+    
+    // Apply entity type filter
+    if (this.filterEntityType()) {
+      logs = logs.filter(log => log.entityType === this.filterEntityType());
+    }
+    
+    // Apply search filter
+    const search = this.searchTerm().toLowerCase();
     if (search) {
       logs = logs.filter(log => 
         log.userName.toLowerCase().includes(search) ||
@@ -85,16 +114,8 @@ export class AuditTrailComponent implements OnInit {
 
     this.loading.set(true);
     try {
-      const filters: any = {};
-      
-      if (this.filterStartDate()) filters.startDate = this.filterStartDate();
-      if (this.filterEndDate()) filters.endDate = this.filterEndDate();
-      if (this.filterUserId()) filters.userId = this.filterUserId();
-      if (this.filterAction()) filters.action = this.filterAction();
-      if (this.filterEntityType()) filters.entityType = this.filterEntityType();
-
-      const logs = await this.dataService.getAuditLogs(filters);
-      this.auditLogs.set(logs);
+      // Note: We now use dataService.auditLogs() directly via computed signal
+      // This method kept for future filter implementation if needed
       this.currentPage.set(1);
     } catch (error) {
       console.error('Failed to load audit logs:', error);
