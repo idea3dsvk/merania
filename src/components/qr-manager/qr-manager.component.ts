@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, signal, inject, computed } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal, inject, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '../../pipes/translate.pipe';
@@ -23,13 +23,13 @@ interface QRLocation {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, FormsModule, TranslatePipe],
 })
-export class QRManagerComponent {
+export class QRManagerComponent implements OnInit {
   private authService = inject(AuthService);
   private dataService = inject(DataService);
   translationService = inject(TranslationService);
 
   // State
-  locations = signal<QRLocation[]>(this.loadLocations());
+  locations = signal<QRLocation[]>([]);
   showAddDialog = signal(false);
   newLocationName = signal('');
   newLocationType = signal<MeasurementType>('temperature_humidity');
@@ -42,6 +42,11 @@ export class QRManagerComponent {
   measurementTypes = MEASUREMENT_TYPES;
 
   private readonly STORAGE_KEY = 'qr-locations';
+
+  ngOnInit() {
+    // Load locations from localStorage on component initialization
+    this.locations.set(this.loadLocations());
+  }
 
   private loadLocations(): QRLocation[] {
     try {
