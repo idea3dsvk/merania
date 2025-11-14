@@ -5,11 +5,8 @@ import { ToastService } from './toast.service';
 import { ErrorHandlerService } from './error-handler.service';
 import { FirebaseService } from './firebase.service';
 import { AuthService } from './auth.service';
-
-// These declare statements are to inform TypeScript about global variables
-// loaded from CDNs in index.html
-declare var jspdf: any;
-declare var autoTable: any;
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 @Injectable({
   providedIn: 'root',
@@ -262,14 +259,6 @@ export class DataService {
         return;
     }
     
-    // Check if jsPDF is available
-    if (typeof jspdf === 'undefined' || !jspdf.jsPDF) {
-        this.toastService.error('PDF library not loaded. Please refresh the page.');
-        console.error('jsPDF library not found');
-        return;
-    }
-    
-    const { jsPDF } = jspdf;
     const doc = new jsPDF();
     
     doc.text(this.translationService.translate('pdf.reportTitle'), 14, 16);
@@ -295,13 +284,6 @@ export class DataService {
             default: return base;
         }
     });
-
-    // Check if autoTable is available
-    if (typeof autoTable === 'undefined') {
-        this.toastService.error('PDF table library not loaded. Please refresh the page.');
-        console.error('jsPDF autoTable plugin not found');
-        return;
-    }
 
     autoTable(doc, {
         head: [[t('pdf.headers.id'), t('pdf.headers.date'), t('pdf.headers.type'), t('pdf.headers.location'), t('pdf.headers.details')]],
