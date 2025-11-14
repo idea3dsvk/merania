@@ -26,7 +26,7 @@
           <input 
             type="file" 
             id="fileInput" 
-            accept=".csv,.xlsx,.xls"
+            accept=".json,.csv,.xlsx,.xls"
             (change)="onFileSelected($event)"
             [disabled]="importing()"
             class="hidden"
@@ -42,7 +42,7 @@
             <p class="mt-2 text-sm text-gray-600">
               {{ 'importExport.clickToUpload' | translate }}
             </p>
-            <p class="mt-1 text-xs text-gray-500">CSV, XLSX, XLS</p>
+            <p class="mt-1 text-xs text-gray-500">JSON (CSV, XLSX coming soon)</p>
           </label>
         </div>
 
@@ -91,14 +91,34 @@
           <summary class="cursor-pointer text-sm text-indigo-600 hover:text-indigo-800">
             {{ 'importExport.formatHelp' | translate }}
           </summary>
-          <div class="mt-2 text-xs text-gray-600 bg-gray-50 p-3 rounded">
-            <p class="font-semibold mb-2">{{ 'importExport.requiredColumns' | translate }}:</p>
-            <ul class="list-disc list-inside space-y-1">
-              <li><code>date</code> - {{ 'importExport.dateColumn' | translate }}</li>
-              <li><code>location</code> - {{ 'importExport.locationColumn' | translate }}</li>
-              <li><code>temperature</code>, <code>humidity</code> - {{ 'importExport.tempHumColumn' | translate }}</li>
-              <li><code>luminosity</code>, <code>dustParticles</code>, etc.</li>
-            </ul>
+          <div class="mt-2 text-xs text-gray-600 bg-gray-50 p-3 rounded space-y-3">
+            <div>
+              <p class="font-semibold mb-2">JSON Format (Supported):</p>
+              <pre class="bg-gray-800 text-gray-100 p-2 rounded text-xs overflow-x-auto">{{ '{' }}
+  "measurements": [
+    {{ '{' }}
+      "type": "temperature_humidity",
+      "date": "2024-01-01T10:00:00.000Z",
+      "location": "Workplace A",
+      "temperature": 22.5,
+      "humidity": 45,
+      "deviceId": "Device-001",
+      "notes": "Regular check"
+    {{ '}' }}
+  ],
+  "exportDate": "2024-01-15T12:00:00.000Z"
+{{ '}' }}</pre>
+              <p class="mt-2 text-xs text-gray-500">Use "Export to JSON" to get the correct format</p>
+            </div>
+            <div>
+              <p class="font-semibold mb-2">Required fields:</p>
+              <ul class="list-disc list-inside space-y-1">
+                <li><code>type</code> - measurement type (required)</li>
+                <li><code>date</code> - ISO date string (required)</li>
+                <li><code>location</code> - workplace location (required)</li>
+                <li>Type-specific fields (e.g., temperature, humidity, luminosity)</li>
+              </ul>
+            </div>
           </div>
         </details>
       </div>
