@@ -19,6 +19,7 @@ export class DataService {
   private authService = inject(AuthService);
   private readonly STORAGE_KEY = 'workplace-measurements';
   private readonly AUDIT_STORAGE_KEY = 'workplace-audit-logs';
+  private readonly QR_LOCATIONS_COLLECTION = 'qr_locations';
   private readonly COLLECTION_NAME = 'measurements';
   private readonly AUDIT_COLLECTION = 'audit_logs';
   
@@ -26,9 +27,11 @@ export class DataService {
   // with calls to a backend service like Firebase Firestore.
   private _measurements = signal<Measurement[]>(this.loadFromStorage());
   private _auditLogs = signal<AuditLog[]>(this.loadAuditLogsFromStorage());
+  private _qrLocations = signal<any[]>(this.loadQRLocationsFromStorage());
 
   public readonly measurements = this._measurements.asReadonly();
   public readonly auditLogs = this._auditLogs.asReadonly();
+  public readonly qrLocations = this._qrLocations.asReadonly();
 
   constructor() {
     // Save to localStorage whenever measurements change
@@ -37,6 +40,8 @@ export class DataService {
     this.initializeFirebaseSync();
     // Initialize audit logs
     this.initializeAuditLogs();
+    // Initialize QR locations
+    this.initializeQRLocations();
   }
 
   private async initializeFirebaseSync(): Promise<void> {
@@ -420,5 +425,134 @@ export class DataService {
     }
 
     return logs.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+  }
+
+  // QR Locations Methods
+  private loadQRLocationsFromStorage(): any[] {
+    try {
+      const data = localStorage.getItem('qr-locations');
+      return data ? JSON.parse(data) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  private saveQRLocationsToStorage(locations: any[]): void {
+    try {
+      localStorage.setItem('qr-locations', JSON.stringify(locations));
+    } catch (error) {
+      console.error('Failed to save QR locations to localStorage:', error);
+    }
+  }
+
+  private async initializeQRLocations(): Promise<void> {
+    if (!this.firebaseService.isFirebaseAvailable()) {
+      console.log('Firebase not available, using localStorage for QR locations');
+      return;
+    }
+
+    try {
+      // Load QR locations from Firebase
+      const qrData = await this.firebaseService.getCollection(this.QR_LOCATIONS_COLLECTION);
+      if (qrData.length > 0) {
+        console.log('Loaded QR locations from Firebase:', qrData.length);
+        const locations = qrData as any[];
+        this._qrLocations.set(locations);
+        // Save to localStorage as backup
+        this.saveQRLocationsToStorage(locations);
+      }
+
+      // Subscribe to real-time updates
+      this.firebaseService.subscribeToCollection(
+        this.QR_LOCATIONS_COLLECTION,
+        (data) => {
+          console.log('QR locations real-time update:', data.length);
+          const locations = data as any[];
+          this._qrLocations.set(locations);
+          // Save to localStorage as backup
+          this.saveQRLocationsToStorage(locations);
+        }
+      );
+    } catch (error) {
+      console.error('QR locations initialization error:', error);
+    }
+  }
+
+  async addQRLocation(location: any): Promise<void> {
+    if (!this.firebaseService.isFirebaseAvailable()) {
+      // Fallback to localStorage only
+      this._qrLocations.update(locs => {
+        const updated = [...locs, location];
+        this.saveQRLocationsToStorage(updated);
+        return updated;
+      });
+      return;
+    }
+
+    try {
+      await this.firebaseService.saveDocument(this.QR_LOCATIONS_COLLECTION, location.id, location);
+      console.log('QR location saved:', location.id);
+      // Also update local signal
+      this._qrLocations.update(locs => {
+        const updated = [...locs, location];
+        this.saveQRLocationsToStorage(updated);
+        return updated;
+      });
+    } catch (error) {
+      console.error('Failed to save QR location:', error);
+      throw error;
+    }
+  }
+
+  async updateQRLocation(id: string, location: any): Promise<void> {
+    if (!this.firebaseService.isFirebaseAvailable()) {
+      // Fallback to localStorage only
+      this._qrLocations.update(locs => {
+        const updated = locs.map(loc => loc.id === id ? location : loc);
+        this.saveQRLocationsToStorage(updated);
+        return updated;
+      });
+      return;
+    }
+
+    try {
+      await this.firebaseService.saveDocument(this.QR_LOCATIONS_COLLECTION, id, location);
+      console.log('QR location updated:', id);
+      // Also update local signal
+      this._qrLocations.update(locs => {
+        const updated = locs.map(loc => loc.id === id ? location : loc);
+        this.saveQRLocationsToStorage(updated);
+        return updated;
+      });
+    } catch (error) {
+      console.error('Failed to update QR location:', error);
+      throw error;
+    }
+  }
+
+  async deleteQRLocation(id: string): Promise<void> {
+    if (!this.firebaseService.isFirebaseAvailable()) {
+      // Fallback to localStorage only
+      this._qrLocations.update(locs => {
+        const updated = locs.filter(loc => loc.id !== id);
+        this.saveQRLocationsToStorage(updated);
+        return updated;
+      });
+      return;
+    }
+
+    try {
+      await this.firebaseService.deleteDocument(this.QR_LOCATIONS_COLLECTION, id);
+      console.log('QR location deleted:', id);
+      // Also update local signal
+      this._qrLocations.update(locs => {
+        const updated = locs.filter(loc => loc.id !== id);
+        this.saveQRLocationsToStorage(updated);
+        return updated;
+      });
+    } catch (error) {
+      console.error('Failed to delete QR location:', error);
+      throw error;
+    }
   }
 }

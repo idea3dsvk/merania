@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, signal, inject, computed, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal, inject, computed, OnInit, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '../../pipes/translate.pipe';
@@ -44,28 +44,11 @@ export class QRManagerComponent implements OnInit {
   private readonly STORAGE_KEY = 'qr-locations';
 
   ngOnInit() {
-    // Load locations from localStorage on component initialization
-    this.locations.set(this.loadLocations());
-  }
-
-  private loadLocations(): QRLocation[] {
-    try {
-      const stored = localStorage.getItem(this.STORAGE_KEY);
-      if (stored) {
-        return JSON.parse(stored);
-      }
-    } catch (error) {
-      console.error('Failed to load QR locations:', error);
-    }
-    return [];
-  }
-
-  private saveLocations(locations: QRLocation[]): void {
-    try {
-      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(locations));
-    } catch (error) {
-      console.error('Failed to save QR locations:', error);
-    }
+    // Initialize locations from dataService which syncs with Firebase
+    // We'll keep our local copy but it will be updated by dataService
+    effect(() => {
+      this.locations.set(this.dataService.qrLocations());
+    });
   }
 
   openAddDialog(): void {
@@ -116,12 +99,8 @@ export class QRManagerComponent implements OnInit {
 
       qrLocation.qrCodeDataUrl = qrCodeDataUrl;
 
-      // Add to locations
-      this.locations.update(locs => {
-        const updated = [...locs, qrLocation];
-        this.saveLocations(updated);
-        return updated;
-      });
+      // Save to Firebase through DataService
+      await this.dataService.addQRLocation(qrLocation);
 
       this.closeAddDialog();
     } catch (error) {
@@ -155,7 +134,9 @@ export class QRManagerComponent implements OnInit {
         const updated = locs.map(loc =>
           loc.id === location.id ? { ...loc, qrCodeDataUrl } : loc
         );
-        this.saveLocations(updated);
+        // Update Firebase
+        this.dataService.updateQRLocation(location.id, { ...location, qrCodeDataUrl });
+        return updated;
         return updated;
       });
     } catch (error) {
@@ -224,10 +205,9 @@ export class QRManagerComponent implements OnInit {
 
   deleteLocation(location: QRLocation): void {
     if (confirm(`Are you sure you want to delete QR code for "${location.name}"?`)) {
+      this.dataService.deleteQRLocation(location.id);
       this.locations.update(locs => {
-        const updated = locs.filter(loc => loc.id !== location.id);
-        this.saveLocations(updated);
-        return updated;
+        return locs.filter(loc => loc.id !== location.id);
       });
     }
   }
