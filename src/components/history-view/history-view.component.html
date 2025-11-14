@@ -122,7 +122,7 @@
                     <span>{{ 'history.detailsPrefix.temp' | translate }}: {{ item.temperature | localeNumber:1 }}°C ({{item.limits.temperatureMin | localeNumber:0}}-{{item.limits.temperatureMax | localeNumber:0}}), </span>
                     <span>{{ 'history.detailsPrefix.hum' | translate }}: {{ item.humidity | localeNumber:1 }}% ({{item.limits.humidityMin | localeNumber:0}}-{{item.limits.humidityMax | localeNumber:0}})</span>
                   }
-                  @case ('luminosity') { {{ 'history.detailsPrefix.lux' | translate }}: {{ item.luminosity | localeNumber:0 }}/{{item.limit | localeNumber:0}}lx }
+                  @case ('luminosity') { {{ 'history.detailsPrefix.lux' | translate }}: {{ item.luminosity | localeNumber:0 }}@if(item.limit){/{{item.limit | localeNumber:0}}lx} }
                   @case ('dustiness_iso6') { 
                     0.5µm: {{ item.particles_0_5um | localeNumber:0 }} ({{item.limits.particles_0_5um_min | localeNumber:0}}-{{item.limits.particles_0_5um_max | localeNumber:0}}), 
                     5µm: {{ item.particles_5um | localeNumber:0 }} ({{item.limits.particles_5um_min | localeNumber:0}}-{{item.limits.particles_5um_max | localeNumber:0}})
@@ -131,9 +131,9 @@
                     0.5µm: {{ item.particles_0_5um | localeNumber:0 }} ({{item.limits.particles_0_5um_min | localeNumber:0}}-{{item.limits.particles_0_5um_max | localeNumber:0}}), 
                     5µm: {{ item.particles_5um | localeNumber:0 }} ({{item.limits.particles_5um_min | localeNumber:0}}-{{item.limits.particles_5um_max | localeNumber:0}})
                   }
-                  @case ('torque') { {{ 'history.detailsPrefix.val' | translate }}: {{ item.torqueValue | localeNumber:1 }}Nm, {{ 'history.detailsPrefix.limit' | translate }}: {{item.limit | localeNumber:1}}Nm }
-                  @case ('surface_resistance') { {{ 'history.detailsPrefix.r' | translate }}: {{ item.resistance.toExponential(1) }}Ω, {{ 'history.detailsPrefix.limit' | translate }}: {{item.limit.toExponential(1)}}Ω }
-                  @case ('grounding_resistance') { {{ 'history.detailsPrefix.r' | translate }}: {{ item.resistance | localeNumber:2 }}Ω, {{ 'history.detailsPrefix.limit' | translate }}: {{item.limit | localeNumber:2}}Ω }
+                  @case ('torque') { {{ 'history.detailsPrefix.val' | translate }}: {{ item.torqueValue | localeNumber:1 }}Nm@if(item.limit){, {{ 'history.detailsPrefix.limit' | translate }}: {{item.limit | localeNumber:1}}Nm} }
+                  @case ('surface_resistance') { {{ 'history.detailsPrefix.r' | translate }}: {{ item.resistance?.toExponential(1) || 'N/A' }}Ω@if(item.limit){, {{ 'history.detailsPrefix.limit' | translate }}: {{item.limit.toExponential(1)}}Ω} }
+                  @case ('grounding_resistance') { {{ 'history.detailsPrefix.r' | translate }}: {{ item.resistance | localeNumber:2 }}Ω@if(item.limit){, {{ 'history.detailsPrefix.limit' | translate }}: {{item.limit | localeNumber:2}}Ω} }
                   @case ('ionizer') { {{ 'history.detailsPrefix.bal' | translate }}: {{ item.balance | localeNumber:1 }}V, {{ 'history.detailsPrefix.dPositive' | translate }}: {{item.decayTimePositive | localeNumber:1}}s }
                 }
                 </td>
