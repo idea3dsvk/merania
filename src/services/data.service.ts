@@ -21,13 +21,14 @@ export class DataService {
   private firebaseService = inject(FirebaseService);
   private authService = inject(AuthService);
   private readonly STORAGE_KEY = 'workplace-measurements';
+  private readonly AUDIT_STORAGE_KEY = 'workplace-audit-logs';
   private readonly COLLECTION_NAME = 'measurements';
   private readonly AUDIT_COLLECTION = 'audit_logs';
   
   // This is a mock database. In a real application, you would replace this
   // with calls to a backend service like Firebase Firestore.
   private _measurements = signal<Measurement[]>(this.loadFromStorage());
-  private _auditLogs = signal<AuditLog[]>([]);
+  private _auditLogs = signal<AuditLog[]>(this.loadAuditLogsFromStorage());
 
   public readonly measurements = this._measurements.asReadonly();
   public readonly auditLogs = this._auditLogs.asReadonly();
@@ -91,6 +92,23 @@ export class DataService {
       { id: 'gres1', type: 'grounding_resistance', date: new Date(Date.now() - 86400000 * 0.5).toISOString(), location: 'Main Grounding Point', pointId: 'GP-01', resistance: 0.8, limits: { min: 0, max: 1.0 } },
       { id: 'ion1', type: 'ionizer', date: new Date().toISOString(), location: 'Clean Room A', ionizerId: 'ION-03', decayTimePositive: 4.5, decayTimeNegative: 4.8, balance: 15, limits: { decayTime: 5.0, balance: 35 } },
     ];
+  }
+
+  private loadAuditLogsFromStorage(): AuditLog[] {
+    try {
+      const data = localStorage.getItem(this.AUDIT_STORAGE_KEY);
+      return data ? JSON.parse(data) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  private saveAuditLogsToStorage(logs: AuditLog[]): void {
+    try {
+      localStorage.setItem(this.AUDIT_STORAGE_KEY, JSON.stringify(logs));
+    } catch (error) {
+      console.error('Failed to save audit logs to localStorage:', error);
+    }
   }
 
   private saveToStorage(measurements: Measurement[]): void {
@@ -283,7 +301,7 @@ export class DataService {
   // Audit Trail Methods
   private async initializeAuditLogs(): Promise<void> {
     if (!this.firebaseService.isFirebaseAvailable()) {
-      console.log('Firebase not available, audit logs disabled');
+      console.log('Firebase not available, using localStorage for audit logs');
       return;
     }
 
@@ -292,7 +310,10 @@ export class DataService {
       const auditData = await this.firebaseService.getCollection(this.AUDIT_COLLECTION);
       if (auditData.length > 0) {
         console.log('Loaded audit logs from Firebase:', auditData.length);
-        this._auditLogs.set(auditData as AuditLog[]);
+        const logs = auditData as AuditLog[];
+        this._auditLogs.set(logs);
+        // Save to localStorage as backup
+        this.saveAuditLogsToStorage(logs);
       }
 
       // Subscribe to real-time updates
@@ -300,7 +321,10 @@ export class DataService {
         this.AUDIT_COLLECTION,
         (data) => {
           console.log('Audit logs real-time update:', data.length);
-          this._auditLogs.set(data as AuditLog[]);
+          const logs = data as AuditLog[];
+          this._auditLogs.set(logs);
+          // Save to localStorage as backup
+          this.saveAuditLogsToStorage(logs);
         }
       );
     } catch (error) {
@@ -339,6 +363,8 @@ export class DataService {
       const updated = [...logs, auditLog].sort((a, b) => 
         new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
       );
+      // Save to localStorage
+      this.saveAuditLogsToStorage(updated);
       return updated;
     });
 
