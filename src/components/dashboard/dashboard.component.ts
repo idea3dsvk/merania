@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, signal, inject, computed } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal, inject, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DataService } from '../../services/data.service';
 import { AuthService } from '../../services/auth.service';
@@ -10,13 +10,19 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
 import { TranslationService } from '../../services/translation.service';
 import { LimitsService } from '../../services/limits.service';
 
+interface ScannedQRData {
+  location: string;
+  type: MeasurementType;
+  id: string;
+}
+
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, MeasurementFormComponent, MeasurementCardComponent, LimitsDialogComponent, TranslatePipe],
 })
-export class DashboardComponent {
+export class DashboardComponent implements OnInit {
   private dataService = inject(DataService);
   private authService = inject(AuthService);
   private translationService = inject(TranslationService);
@@ -26,11 +32,30 @@ export class DashboardComponent {
   selectedMeasurementType = signal<MeasurementType | null>(null);
   showLimitsDialog = signal(false);
   selectedLimitsType = signal<MeasurementType | null>(null);
+  scannedLocation = signal<string | null>(null);
   
   // Computed: check if user can edit limits
   canEditLimits = computed(() => this.authService.canEditLimits());
 
   measurementTypes = MEASUREMENT_TYPES;
+  
+  ngOnInit() {
+    // Check for scanned QR data
+    const scannedDataStr = localStorage.getItem('scannedQRData');
+    if (scannedDataStr) {
+      try {
+        const scannedData: ScannedQRData = JSON.parse(scannedDataStr);
+        // Clear the stored data
+        localStorage.removeItem('scannedQRData');
+        // Store location for form pre-fill
+        this.scannedLocation.set(scannedData.location);
+        // Open the measurement form
+        this.openAddModal(scannedData.type);
+      } catch (error) {
+        console.error('Failed to parse scanned QR data:', error);
+      }
+    }
+  }
   
   getMeasurementName(type: MeasurementType): string {
     return this.translationService.translate(`measurementNames.${type}`);
@@ -79,6 +104,7 @@ export class DashboardComponent {
   closeModal() {
     this.showAddModal.set(false);
     this.selectedMeasurementType.set(null);
+    this.scannedLocation.set(null);
   }
 
   async handleFormSubmit(measurementData: Omit<Measurement, 'id'>) {

@@ -14,6 +14,7 @@ import { LimitsService } from '../../services/limits.service';
 export class MeasurementFormComponent implements OnInit {
   measurementType = input.required<MeasurementType>();
   existingMeasurement = input<Measurement | null>(null);
+  scannedLocation = input<string | null>(null);
   
   formSubmitted = output<Omit<Measurement, 'id'>>();
   formCancelled = output<void>();
@@ -29,6 +30,8 @@ export class MeasurementFormComponent implements OnInit {
 
   private populateForm() {
     const existing = this.existingMeasurement();
+    const location = this.scannedLocation();
+    
     if (existing) {
       this.form.patchValue({
         date: new Date(existing.date).toISOString().slice(0, 16),
@@ -36,6 +39,14 @@ export class MeasurementFormComponent implements OnInit {
         deviceId: existing.deviceId || '',
         notes: existing.notes || '',
       });
+    } else if (location) {
+      // Pre-fill location from scanned QR code
+      this.form.patchValue({
+        location: location,
+      });
+    }
+    
+    if (existing) {
 
       // Type-specific fields (no longer include limit fields)
       if (existing.type === 'temperature_humidity') {

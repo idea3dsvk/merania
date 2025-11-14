@@ -22,6 +22,7 @@
       </div>
       <app-measurement-form 
         [measurementType]="selectedMeasurementType()!"
+        [scannedLocation]="scannedLocation()"
         (formSubmitted)="handleFormSubmit($event)"
         (formCancelled)="closeModal()"
       ></app-measurement-form>

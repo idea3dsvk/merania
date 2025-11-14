@@ -387,16 +387,6 @@ export class QRScannerComponent implements OnInit, OnDestroy {
   }
 
   getMeasurementTypeName(type: MeasurementType): string {
-    const typeMap: Record<MeasurementType, string> = {
-      'temperature_humidity': this.translationService.translate('measurementTypes.temperatureHumidity'),
-      'luminosity': this.translationService.translate('measurementTypes.lighting'),
-      'dustiness_iso6': this.translationService.translate('measurementTypes.dust') + ' ISO 6',
-      'dustiness_iso5': this.translationService.translate('measurementTypes.dust') + ' ISO 5',
-      'torque': this.translationService.translate('measurementTypes.torque'),
-      'surface_resistance': this.translationService.translate('measurementTypes.surfaceResistance'),
-      'grounding_resistance': this.translationService.translate('measurementTypes.groundingResistance'),
-      'ionizer': this.translationService.translate('measurementTypes.ionizer'),
-    };
-    return typeMap[type] || type;
+    return this.translationService.translate(`measurementNames.${type}`);
   }
 }
