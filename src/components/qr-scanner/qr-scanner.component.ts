@@ -244,6 +244,13 @@ export class QRScannerComponent implements OnDestroy {
     aspectRatio: 1.0,
     disableFlip: false,
     rememberLastUsedCamera: true,
+    // iOS specific settings
+    videoConstraints: {
+      facingMode: "environment" // Use back camera on mobile
+    },
+    // Show only camera option, hide file upload
+    showTorchButtonIfSupported: true,
+    formatsToSupport: undefined // Support all QR code formats
   };
 
   ngOnInit() {
@@ -259,11 +266,11 @@ export class QRScannerComponent implements OnDestroy {
       this.errorMessage.set(null);
       this.showPermissionHelp.set(false);
 
-      // Initialize scanner
+      // Initialize scanner with verbose mode for debugging
       this.scanner = new Html5QrcodeScanner(
         'qr-reader',
         this.scannerConfig,
-        false // verbose
+        true // verbose - will show more debug info
       );
 
       // Start scanning
