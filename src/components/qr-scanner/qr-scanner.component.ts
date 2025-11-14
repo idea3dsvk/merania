@@ -240,7 +240,7 @@ export class QRScannerComponent implements OnDestroy {
   private scanner: Html5QrcodeScanner | null = null;
   private scannerConfig = {
     fps: 10,
-    qrbox: { width: 250, height: 250 },
+    qrbox: 250, // Use number instead of object for better compatibility
     aspectRatio: 1.0,
     disableFlip: false,
     rememberLastUsedCamera: true,
@@ -250,7 +250,8 @@ export class QRScannerComponent implements OnDestroy {
     },
     // Show only camera option, hide file upload
     showTorchButtonIfSupported: true,
-    formatsToSupport: undefined // Support all QR code formats
+    // Support all available formats
+    supportedScanTypes: undefined
   };
 
   ngOnInit() {

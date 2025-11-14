@@ -90,17 +90,19 @@ export class QRManagerComponent {
         created: new Date().toISOString(),
       };
 
-      // Generate QR code data
+      // Generate QR code data - use simple format for better scanning
       const qrData = JSON.stringify({
         location: name,
         type: this.newLocationType(),
         id: qrLocation.id,
       });
 
-      // Generate QR code image
+      // Generate QR code image with higher error correction
       const qrCodeDataUrl = await QRCode.toDataURL(qrData, {
         width: 400,
         margin: 2,
+        errorCorrectionLevel: 'H', // High error correction
+        type: 'image/png',
         color: {
           dark: '#000000',
           light: '#FFFFFF',
@@ -136,6 +138,12 @@ export class QRManagerComponent {
       const qrCodeDataUrl = await QRCode.toDataURL(qrData, {
         width: 400,
         margin: 2,
+        errorCorrectionLevel: 'H',
+        type: 'image/png',
+        color: {
+          dark: '#000000',
+          light: '#FFFFFF',
+        },
       });
 
       this.locations.update(locs => {
