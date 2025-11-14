@@ -219,9 +219,16 @@ export class HistoryViewComponent {
     }
   }
 
+  handleDeleteClick(id: string) {
+    console.log('Delete button clicked for ID:', id);
+    this.openDeleteConfirm(id);
+  }
+
   openDeleteConfirm(id: string) {
+    console.log('Opening delete confirmation for ID:', id);
     this.deletingMeasurementId.set(id);
     this.showDeleteConfirm.set(true);
+    console.log('showDeleteConfirm set to:', this.showDeleteConfirm());
   }
 
   closeDeleteConfirm() {
@@ -230,9 +237,12 @@ export class HistoryViewComponent {
   }
 
   async confirmDelete() {
+    console.log('Confirm delete called');
     const id = this.deletingMeasurementId();
+    console.log('Deleting measurement with ID:', id);
     if (id) {
       await this.dataService.deleteMeasurement(id);
+      console.log('Measurement deleted successfully');
       this.closeDeleteConfirm();
     }
   }
