@@ -38,3 +38,20 @@ Firebase API keys are safe to expose in client applications. Security is enforce
 - Firebase Security Rules (firestore.rules)
 - Firebase Authentication
 - Domain restrictions in Firebase Console
+
+# Security Notes - xlsx dependency
+
+## Known Issue
+The `xlsx` package has known vulnerabilities (Prototype Pollution, ReDoS).
+Unfortunately, there is no fixed version available from the maintainer.
+
+## Mitigation
+- The vulnerability requires malicious Excel file input
+- In production, validate and sanitize all uploaded Excel files
+- Consider migrating to `exceljs` package in the future
+
+## Current Status
+- gh-pages vulnerability:  FIXED (upgraded to 5.x)
+- xlsx vulnerability:  NO FIX AVAILABLE (monitoring for updates)
+
+Last checked: November 15, 2025
