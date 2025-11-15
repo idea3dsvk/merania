@@ -1,12 +1,14 @@
 // Development environment configuration
+// DO NOT commit real API keys to version control!
+// For local development, create a environment.local.ts file with your keys
 export const environment = {
   production: false,
   firebase: {
-    apiKey: "AIzaSyClp8810PZUE-52RF1gPJ6dv2iiQb9Ah3k",
+    apiKey: "YOUR_FIREBASE_API_KEY", // Get from Firebase Console
     authDomain: "merania.firebaseapp.com",
     projectId: "merania",
     storageBucket: "merania.firebasestorage.app",
-    messagingSenderId: "179511206563",
-    appId: "1:179511206563:web:da8637bdbf28a232c1d516"
+    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+    appId: "YOUR_FIREBASE_APP_ID"
   }
 };
