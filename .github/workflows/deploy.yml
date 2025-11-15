@@ -28,6 +28,13 @@ jobs:
           node-version: "20"
           cache: "npm"
 
+      
+      - name: Create environment configuration
+        run: |
+          cp src/environments/environment.ts src/environments/environment.local.ts
+          # For production, you should use GitHub Secrets to inject real values
+          # This creates a placeholder file that allows build to succeed
+
       - name: Install dependencies
         run: npm install --legacy-peer-deps
 
