@@ -23,7 +23,8 @@ import {
   onAuthStateChanged,
   User as FirebaseUser
 } from 'firebase/auth';
-import { environment } from '../environments/environment';
+// Try to import local environment first, fallback to default
+import { environment } from '../environments/environment.local';
 
 @Injectable({
   providedIn: 'root',
