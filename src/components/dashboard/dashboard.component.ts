@@ -6,7 +6,6 @@ import { MeasurementFormComponent } from '../measurement-form/measurement-form.c
 import { MeasurementCardComponent, SummaryData } from '../measurement-card/measurement-card.component';
 import { LimitsDialogComponent } from '../limits-dialog/limits-dialog.component';
 import { Measurement, MeasurementType, MEASUREMENT_TYPES, isDustinessMeasurement, isDustinessMeasurementType } from '../../models';
-import { TranslatePipe } from '../../pipes/translate.pipe';
 import { TranslationService } from '../../services/translation.service';
 import { LimitsService } from '../../services/limits.service';
 import { SpecificationsService } from '../../services/specifications.service';
@@ -21,7 +20,7 @@ interface ScannedQRData {
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, MeasurementFormComponent, MeasurementCardComponent, LimitsDialogComponent, TranslatePipe],
+  imports: [CommonModule, MeasurementFormComponent, MeasurementCardComponent, LimitsDialogComponent],
 })
 export class DashboardComponent implements OnInit {
   private dataService = inject(DataService);

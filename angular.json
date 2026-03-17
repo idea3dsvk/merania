@@ -18,6 +18,14 @@
             },
             "browser": "index.tsx",
             "tsConfig": "tsconfig.json",
+            "allowedCommonJsDependencies": [
+              "canvg",
+              "core-js",
+              "html2canvas",
+              "qrcode",
+              "raf",
+              "rgbcolor"
+            ],
             "assets": [
               "src/manifest.webmanifest",
               {
