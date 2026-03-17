@@ -10,7 +10,7 @@
       (ngModelChange)="selectedType.set($event)"
       class="block w-full sm:w-auto rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
     >
-      @for (type of measurementTypes; track type) {
+      @for (type of measurementTypes(); track type) {
         <option [value]="type">{{ getMeasurementTypeName(type) }}</option>
       }
     </select>

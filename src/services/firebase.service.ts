@@ -23,8 +23,8 @@ import {
   onAuthStateChanged,
   User as FirebaseUser
 } from 'firebase/auth';
-// Try to import local environment first, fallback to default
-import { environment } from '../environments/environment.local';
+import { environment } from '../environments/environment';
+import { environment as productionEnvironment } from '../environments/environment.prod';
 
 @Injectable({
   providedIn: 'root',
@@ -37,13 +37,15 @@ export class FirebaseService {
 
   constructor() {
     try {
+      const firebaseConfig = this.resolveFirebaseConfig();
+
       // Initialize Firebase
-      this.app = initializeApp(environment.firebase);
+      this.app = initializeApp(firebaseConfig);
       this.firestore = getFirestore(this.app);
       this.auth = getAuth(this.app);
       
       // Check if Firebase is configured
-      if (!environment.firebase.apiKey || environment.firebase.apiKey === 'YOUR_API_KEY') {
+      if (!this.isValidFirebaseConfig(firebaseConfig)) {
         console.warn('Firebase not configured. Using localStorage fallback.');
         this.isOnline = false;
       }
@@ -51,6 +53,23 @@ export class FirebaseService {
       console.error('Firebase initialization error:', error);
       this.isOnline = false;
     }
+  }
+
+  private resolveFirebaseConfig(): typeof environment.firebase {
+    if (this.isValidFirebaseConfig(environment.firebase)) {
+      return environment.firebase;
+    }
+
+    if (this.isValidFirebaseConfig(productionEnvironment.firebase)) {
+      console.warn('Development Firebase config is missing. Falling back to production Firebase config.');
+      return productionEnvironment.firebase;
+    }
+
+    return environment.firebase;
+  }
+
+  private isValidFirebaseConfig(config: typeof environment.firebase): boolean {
+    return !!config.apiKey && !config.apiKey.includes('YOUR_');
   }
 
   /**

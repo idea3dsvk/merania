@@ -1,6 +1,6 @@
 import { Injectable, inject, computed } from '@angular/core';
 import { DataService } from './data.service';
-import { Measurement, MeasurementType } from '../models';
+import { Measurement, MeasurementType, isDustinessMeasurement } from '../models';
 
 export interface StatisticsData {
   totalMeasurements: number;
@@ -64,18 +64,17 @@ export class StatisticsService {
   });
 
   private isOutOfSpec(m: Measurement): boolean {
+    if (isDustinessMeasurement(m)) {
+      return m.particles_0_5um < m.limits.particles_0_5um_min || m.particles_0_5um > m.limits.particles_0_5um_max ||
+             m.particles_5um < m.limits.particles_5um_min || m.particles_5um > m.limits.particles_5um_max;
+    }
+
     switch (m.type) {
       case 'temperature_humidity':
         return m.temperature < m.limits.temperatureMin || m.temperature > m.limits.temperatureMax ||
                m.humidity < m.limits.humidityMin || m.humidity > m.limits.humidityMax;
       case 'luminosity':
         return m.luminosity < m.limits.min || m.luminosity > m.limits.max;
-      case 'dustiness_iso6':
-        return m.particles_0_5um < m.limits.particles_0_5um_min || m.particles_0_5um > m.limits.particles_0_5um_max ||
-               m.particles_5um < m.limits.particles_5um_min || m.particles_5um > m.limits.particles_5um_max;
-      case 'dustiness_iso5':
-        return m.particles_0_5um < m.limits.particles_0_5um_min || m.particles_0_5um > m.limits.particles_0_5um_max ||
-               m.particles_5um < m.limits.particles_5um_min || m.particles_5um > m.limits.particles_5um_max;
       case 'torque':
         return m.torqueValue < m.limits.min || m.torqueValue > m.limits.max;
       case 'surface_resistance':
@@ -97,16 +96,15 @@ export class StatisticsService {
     
     for (const m of measurements) {
       let value = 0;
+      if (isDustinessMeasurement(m)) {
+        value = (m.particles_0_5um + m.particles_5um) / 2;
+      } else {
       switch (m.type) {
         case 'temperature_humidity':
           value = m.temperature;
           break;
         case 'luminosity':
           value = m.luminosity;
-          break;
-        case 'dustiness_iso6':
-        case 'dustiness_iso5':
-          value = (m.particles_0_5um + m.particles_5um) / 2;
           break;
         case 'torque':
           value = m.torqueValue;
@@ -118,6 +116,7 @@ export class StatisticsService {
         case 'ionizer':
           value = m.balance;
           break;
+      }
       }
       
       const current = sums.get(m.type) || { total: 0, count: 0 };
@@ -193,16 +192,17 @@ export class StatisticsService {
     
     let sum = 0;
     for (const m of measurements) {
+      if (isDustinessMeasurement(m)) {
+        sum += (m.particles_0_5um + m.particles_5um) / 2;
+        continue;
+      }
+
       switch (m.type) {
         case 'temperature_humidity':
           sum += m.temperature;
           break;
         case 'luminosity':
           sum += m.luminosity;
-          break;
-        case 'dustiness_iso6':
-        case 'dustiness_iso5':
-          sum += (m.particles_0_5um + m.particles_5um) / 2;
           break;
         case 'torque':
           sum += m.torqueValue;

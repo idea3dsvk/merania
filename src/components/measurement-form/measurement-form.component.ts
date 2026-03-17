@@ -1,7 +1,7 @@
 import { Component, ChangeDetectionStrategy, input, output, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { MeasurementType, Measurement } from '../../models';
+import { MeasurementType, Measurement, isDustinessMeasurement, isDustinessMeasurementType } from '../../models';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { LimitsService } from '../../services/limits.service';
 
@@ -58,12 +58,7 @@ export class MeasurementFormComponent implements OnInit {
         this.form.patchValue({
           luminosity: existing.luminosity,
         });
-      } else if (existing.type === 'dustiness_iso6') {
-        this.form.patchValue({
-          particles_0_5um: existing.particles_0_5um,
-          particles_5um: existing.particles_5um,
-        });
-      } else if (existing.type === 'dustiness_iso5') {
+      } else if (isDustinessMeasurement(existing)) {
         this.form.patchValue({
           particles_0_5um: existing.particles_0_5um,
           particles_5um: existing.particles_5um,
@@ -95,6 +90,8 @@ export class MeasurementFormComponent implements OnInit {
   }
 
   private buildForm() {
+    const type = this.measurementType();
+
     const commonControls = {
       date: [new Date().toISOString().slice(0, 16), Validators.required],
       location: ['', Validators.required],
@@ -104,7 +101,16 @@ export class MeasurementFormComponent implements OnInit {
 
     let specificControls = {};
 
-    switch (this.measurementType()) {
+    if (isDustinessMeasurementType(type)) {
+      specificControls = {
+        particles_0_5um: [null, [Validators.required, Validators.min(0)]],
+        particles_5um: [null, [Validators.required, Validators.min(0)]],
+      };
+      this.form = this.fb.group({ ...commonControls, ...specificControls });
+      return;
+    }
+
+    switch (type) {
       case 'temperature_humidity':
         specificControls = {
           temperature: [null, [Validators.required, Validators.min(-50), Validators.max(100)]],
@@ -114,18 +120,6 @@ export class MeasurementFormComponent implements OnInit {
       case 'luminosity':
         specificControls = {
           luminosity: [null, [Validators.required, Validators.min(0)]],
-        };
-        break;
-      case 'dustiness_iso6':
-        specificControls = {
-          particles_0_5um: [null, [Validators.required, Validators.min(0)]],
-          particles_5um: [null, [Validators.required, Validators.min(0)]],
-        };
-        break;
-      case 'dustiness_iso5':
-        specificControls = {
-          particles_0_5um: [null, [Validators.required, Validators.min(0)]],
-          particles_5um: [null, [Validators.required, Validators.min(0)]],
         };
         break;
       case 'torque':
@@ -194,7 +188,7 @@ export class MeasurementFormComponent implements OnInit {
             decayTime: limits.decayTime,
             balance: limits.balance
         };
-      } else if (type === 'dustiness_iso6' || type === 'dustiness_iso5') {
+      } else if (isDustinessMeasurementType(type)) {
         // For dustiness types with particle-specific limits
         measurementData.particles_0_5um = formValue.particles_0_5um;
         measurementData.particles_5um = formValue.particles_5um;
@@ -219,5 +213,9 @@ export class MeasurementFormComponent implements OnInit {
 
   cancel() {
     this.formCancelled.emit();
+  }
+
+  isDustinessType(type: string): boolean {
+    return isDustinessMeasurementType(type);
   }
 }

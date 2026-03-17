@@ -5,10 +5,11 @@ import { AuthService } from '../../services/auth.service';
 import { MeasurementFormComponent } from '../measurement-form/measurement-form.component';
 import { MeasurementCardComponent, SummaryData } from '../measurement-card/measurement-card.component';
 import { LimitsDialogComponent } from '../limits-dialog/limits-dialog.component';
-import { Measurement, MeasurementType, MEASUREMENT_TYPES } from '../../models';
+import { Measurement, MeasurementType, MEASUREMENT_TYPES, isDustinessMeasurement, isDustinessMeasurementType } from '../../models';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { TranslationService } from '../../services/translation.service';
 import { LimitsService } from '../../services/limits.service';
+import { SpecificationsService } from '../../services/specifications.service';
 
 interface ScannedQRData {
   location: string;
@@ -27,6 +28,7 @@ export class DashboardComponent implements OnInit {
   private authService = inject(AuthService);
   private translationService = inject(TranslationService);
   private limitsService = inject(LimitsService);
+  private specificationsService = inject(SpecificationsService);
   
   showAddModal = signal(false);
   selectedMeasurementType = signal<MeasurementType | null>(null);
@@ -37,7 +39,18 @@ export class DashboardComponent implements OnInit {
   // Computed: check if user can edit limits
   canEditLimits = computed(() => this.authService.canEditLimits());
 
-  measurementTypes = MEASUREMENT_TYPES;
+  measurementTypes = computed<MeasurementType[]>(() => {
+    const predefined = [...MEASUREMENT_TYPES] as MeasurementType[];
+    const fromSpecs = this.specificationsService
+      .specificationTypes()
+      .filter(type => this.isSupportedMeasurementType(type)) as MeasurementType[];
+    const fromMeasurements = this.dataService
+      .measurements()
+      .map(m => m.type)
+      .filter(type => this.isSupportedMeasurementType(type));
+
+    return Array.from(new Set([...predefined, ...fromSpecs, ...fromMeasurements]));
+  });
   
   ngOnInit() {
     // Check for scanned QR data
@@ -58,7 +71,17 @@ export class DashboardComponent implements OnInit {
   }
   
   getMeasurementName(type: MeasurementType): string {
-    return this.translationService.translate(`measurementNames.${type}`);
+    const key = `measurementNames.${type}`;
+    const translated = this.translationService.translate(key);
+    if (translated !== key) {
+      return translated;
+    }
+
+    return type
+      .split('_')
+      .filter(Boolean)
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
   }
 
   // Memoized computation - only recalculates when measurements, language, or limits change
@@ -76,7 +99,7 @@ export class DashboardComponent implements OnInit {
       measurementsByType.get(measurement.type)!.push(measurement);
     }
     
-    return this.measurementTypes.map(type => {
+    return this.measurementTypes().map(type => {
       const typeMeasurements = measurementsByType.get(type) || [];
       const latest = typeMeasurements[0]; // Assuming sorted by date desc
       return {
@@ -128,15 +151,18 @@ export class DashboardComponent implements OnInit {
 
   private getLatestValueString(m: Measurement | undefined): string {
     if (!m) return this.translationService.translate('dashboard.noData');
+    if (isDustinessMeasurement(m)) {
+      return `0.5µm: ${m.particles_0_5um} / 5µm: ${m.particles_5um}`;
+    }
+
     switch (m.type) {
       case 'temperature_humidity': return `${m.temperature}°C / ${m.humidity}%`;
       case 'luminosity': return `${m.luminosity} lx`;
-      case 'dustiness_iso6': return `0.5µm: ${m.particles_0_5um} / 5µm: ${m.particles_5um}`;
-      case 'dustiness_iso5': return `0.5µm: ${m.particles_0_5um} / 5µm: ${m.particles_5um}`;
       case 'torque': return `${m.torqueValue} Nm`;
       case 'surface_resistance': return `${m.resistance.toExponential(1)} Ω`;
       case 'grounding_resistance': return `${m.resistance} Ω`;
       case 'ionizer': return `${this.translationService.translate('history.detailsPrefix.bal')}: ${m.balance}V`;
+      default: return this.translationService.translate('dashboard.noData');
     }
   }
 
@@ -145,6 +171,11 @@ export class DashboardComponent implements OnInit {
     
     // Get current limits from service
     const limits = this.limitsService.getLimitsForType(m.type);
+
+    if (isDustinessMeasurement(m)) {
+      return m.particles_0_5um < limits.particles_0_5um_min || m.particles_0_5um > limits.particles_0_5um_max ||
+             m.particles_5um < limits.particles_5um_min || m.particles_5um > limits.particles_5um_max;
+    }
     
     switch (m.type) {
       case 'temperature_humidity':
@@ -152,12 +183,6 @@ export class DashboardComponent implements OnInit {
                m.humidity < limits.humidityMin || m.humidity > limits.humidityMax;
       case 'luminosity':
         return m.luminosity < limits.min || m.luminosity > limits.max;
-      case 'dustiness_iso6':
-        return m.particles_0_5um < limits.particles_0_5um_min || m.particles_0_5um > limits.particles_0_5um_max ||
-               m.particles_5um < limits.particles_5um_min || m.particles_5um > limits.particles_5um_max;
-      case 'dustiness_iso5':
-        return m.particles_0_5um < limits.particles_0_5um_min || m.particles_0_5um > limits.particles_0_5um_max ||
-               m.particles_5um < limits.particles_5um_min || m.particles_5um > limits.particles_5um_max;
       case 'torque': 
         return m.torqueValue < limits.min || m.torqueValue > limits.max;
       case 'surface_resistance': 
@@ -169,5 +194,9 @@ export class DashboardComponent implements OnInit {
       default: 
         return false;
     }
+  }
+
+  private isSupportedMeasurementType(type: string): boolean {
+    return MEASUREMENT_TYPES.includes(type as any) || isDustinessMeasurementType(type);
   }
 }

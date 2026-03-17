@@ -2,16 +2,15 @@ import { Component, ChangeDetectionStrategy, input, computed, ViewChild, AfterVi
 import { CommonModule } from '@angular/common';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartType } from 'chart.js';
-import { Measurement, MeasurementType } from '../../models';
+import { Measurement, MeasurementType, isDustinessMeasurementType } from '../../models';
 import { TranslationService } from '../../services/translation.service';
 import { LimitsService } from '../../services/limits.service';
-import { TranslatePipe } from '../../pipes/translate.pipe';
 
 @Component({
   selector: 'app-measurement-chart',
   templateUrl: './measurement-chart.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, BaseChartDirective, TranslatePipe],
+  imports: [CommonModule, BaseChartDirective],
 })
 export class MeasurementChartComponent implements AfterViewInit {
   @ViewChild(BaseChartDirective) chart?: BaseChartDirective;
@@ -114,8 +113,96 @@ export class MeasurementChartComponent implements AfterViewInit {
 
   private getDatasets(measurements: Measurement[]): ChartConfiguration['data']['datasets'] {
     const type = this.measurementType();
+
+    if (isDustinessMeasurementType(type)) {
+      const currentLimits = this.limitsService.getLimitsForType(type);
+
+      const particles_0_5um_data = measurements.map((m: any) => m.particles_0_5um);
+      const particles_5um_data = measurements.map((m: any) => m.particles_5um);
+      const particles_0_5um_minData = measurements.map(() => currentLimits.particles_0_5um_min);
+      const particles_0_5um_maxData = measurements.map(() => currentLimits.particles_0_5um_max);
+      const particles_5um_minData = measurements.map(() => currentLimits.particles_5um_min);
+      const particles_5um_maxData = measurements.map(() => currentLimits.particles_5um_max);
+
+      return [
+        {
+          data: particles_0_5um_data,
+          label: this.translationService.translate('form.particles_0_5um'),
+          borderColor: 'rgb(99, 102, 241)',
+          backgroundColor: 'rgba(99, 102, 241, 0.1)',
+          fill: true,
+          tension: 0.4,
+          borderWidth: 2,
+        } as any,
+        {
+          data: particles_0_5um_minData,
+          label: this.translationService.translate('form.particles_0_5um') + ' Min',
+          borderColor: 'rgb(251, 146, 60)',
+          backgroundColor: 'transparent',
+          borderDash: [5, 5],
+          fill: false,
+          tension: 0,
+          pointRadius: 0,
+          borderWidth: 2,
+          segment: {
+            borderDash: [5, 5],
+          }
+        } as any,
+        {
+          data: particles_0_5um_maxData,
+          label: this.translationService.translate('form.particles_0_5um') + ' Max',
+          borderColor: 'rgb(220, 38, 38)',
+          backgroundColor: 'transparent',
+          borderDash: [5, 5],
+          fill: false,
+          tension: 0,
+          pointRadius: 0,
+          borderWidth: 2,
+          segment: {
+            borderDash: [5, 5],
+          }
+        } as any,
+        {
+          data: particles_5um_data,
+          label: this.translationService.translate('form.particles_5um'),
+          borderColor: 'rgb(67, 56, 202)',
+          backgroundColor: 'rgba(67, 56, 202, 0.1)',
+          fill: true,
+          tension: 0.4,
+          borderWidth: 2,
+        } as any,
+        {
+          data: particles_5um_minData,
+          label: this.translationService.translate('form.particles_5um') + ' Min',
+          borderColor: 'rgb(251, 191, 36)',
+          backgroundColor: 'transparent',
+          borderDash: [5, 5],
+          fill: false,
+          tension: 0,
+          pointRadius: 0,
+          borderWidth: 2,
+          segment: {
+            borderDash: [5, 5],
+          }
+        } as any,
+        {
+          data: particles_5um_maxData,
+          label: this.translationService.translate('form.particles_5um') + ' Max',
+          borderColor: 'rgb(185, 28, 28)',
+          backgroundColor: 'transparent',
+          borderDash: [5, 5],
+          fill: false,
+          tension: 0,
+          pointRadius: 0,
+          borderWidth: 2,
+          segment: {
+            borderDash: [5, 5],
+          }
+        } as any,
+      ];
+    }
     
-    switch (type) {
+    switch (type as string) {
       case 'temperature_humidity': {
         // Get current limits from service
         const currentLimits = this.limitsService.getLimitsForType('temperature_humidity');
@@ -640,5 +727,19 @@ export class MeasurementChartComponent implements AfterViewInit {
       default:
         return [];
     }
+  }
+
+  getMeasurementTypeName(type: MeasurementType): string {
+    const key = `measurementNames.${type}`;
+    const translated = this.translationService.translate(key);
+    if (translated !== key) {
+      return translated;
+    }
+
+    return type
+      .split('_')
+      .filter(Boolean)
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
   }
 }

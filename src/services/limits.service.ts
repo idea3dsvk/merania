@@ -1,8 +1,9 @@
 import { Injectable, signal, inject } from '@angular/core';
-import { MeasurementType } from '../models';
+import { MeasurementType, isDustinessMeasurementType } from '../models';
 import { FirebaseService } from './firebase.service';
 
 export interface MeasurementLimits {
+  [type: string]: any;
   temperature_humidity?: {
     temperatureMin: number;
     temperatureMax: number;
@@ -113,6 +114,12 @@ export class LimitsService {
         particles_5um_min: 0,
         particles_5um_max: 293,
       },
+      dustiness_iso8: {
+        particles_0_5um_min: 0,
+        particles_0_5um_max: 3520000,
+        particles_5um_min: 0,
+        particles_5um_max: 29300,
+      },
       torque: {
         min: 4.0,
         max: 6.0,
@@ -159,6 +166,47 @@ export class LimitsService {
   }
 
   getLimitsForType(type: MeasurementType): any {
-    return this._limits()[type];
+    const existing = this._limits()[type];
+    if (existing) {
+      return existing;
+    }
+
+    const defaults = this.getDefaultLimitsForType(type);
+    this._limits.update(current => {
+      const updated = { ...current, [type]: defaults };
+      this.saveToStorage(updated);
+      return updated;
+    });
+    return defaults;
+  }
+
+  private getDefaultLimitsForType(type: MeasurementType): any {
+    if (isDustinessMeasurementType(type)) {
+      const isoClass = Number.parseInt(type.replace('dustiness_iso', ''), 10);
+      if (isoClass === 5) {
+        return {
+          particles_0_5um_min: 0,
+          particles_0_5um_max: 3520,
+          particles_5um_min: 0,
+          particles_5um_max: 293,
+        };
+      }
+      if (isoClass === 8) {
+        return {
+          particles_0_5um_min: 0,
+          particles_0_5um_max: 3520000,
+          particles_5um_min: 0,
+          particles_5um_max: 29300,
+        };
+      }
+      return {
+        particles_0_5um_min: 0,
+        particles_0_5um_max: 10200,
+        particles_5um_min: 0,
+        particles_5um_max: 2930,
+      };
+    }
+
+    return { min: 0, max: 100 };
   }
 }

@@ -5,7 +5,8 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
 import { TranslationService } from '../../services/translation.service';
 import { AuthService } from '../../services/auth.service';
 import { DataService } from '../../services/data.service';
-import { MeasurementType, MEASUREMENT_TYPES } from '../../models';
+import { MeasurementType, MEASUREMENT_TYPES, isDustinessMeasurementType } from '../../models';
+import { SpecificationsService } from '../../services/specifications.service';
 import * as QRCode from 'qrcode';
 
 interface QRLocation {
@@ -26,6 +27,7 @@ interface QRLocation {
 export class QRManagerComponent implements OnInit {
   private authService = inject(AuthService);
   private dataService = inject(DataService);
+  private specificationsService = inject(SpecificationsService);
   translationService = inject(TranslationService);
 
   // State
@@ -39,7 +41,16 @@ export class QRManagerComponent implements OnInit {
 
   // Computed
   isAdmin = computed(() => this.authService.currentUser()?.role === 'admin');
-  measurementTypes = MEASUREMENT_TYPES;
+  measurementTypes = computed<MeasurementType[]>(() => {
+    const fromSpecs = this.specificationsService
+      .specificationTypes()
+      .filter(type => this.isSupportedMeasurementType(type)) as MeasurementType[];
+    const fromData = this.dataService
+      .measurements()
+      .map(m => m.type)
+      .filter(type => this.isSupportedMeasurementType(type));
+    return Array.from(new Set([...(MEASUREMENT_TYPES as MeasurementType[]), ...fromSpecs, ...fromData]));
+  });
 
   private readonly STORAGE_KEY = 'qr-locations';
 
@@ -55,8 +66,9 @@ export class QRManagerComponent implements OnInit {
   }
 
   openAddDialog(): void {
+    const availableTypes = this.measurementTypes();
     this.newLocationName.set('');
-    this.newLocationType.set('temperature_humidity');
+    this.newLocationType.set(availableTypes[0] ?? 'temperature_humidity');
     this.showAddDialog.set(true);
   }
 
@@ -250,6 +262,20 @@ export class QRManagerComponent implements OnInit {
   }
 
   getMeasurementTypeName(type: MeasurementType): string {
-    return this.translationService.translate('measurementNames.' + type);
+    const key = 'measurementNames.' + type;
+    const translated = this.translationService.translate(key);
+    if (translated !== key) {
+      return translated;
+    }
+
+    return type
+      .split('_')
+      .filter(Boolean)
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  }
+
+  private isSupportedMeasurementType(type: string): boolean {
+    return MEASUREMENT_TYPES.includes(type as any) || isDustinessMeasurementType(type);
   }
 }

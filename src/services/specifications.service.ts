@@ -1,5 +1,5 @@
-import { Injectable, signal, inject } from '@angular/core';
-import { ISOSpecification, MeasurementType } from '../models';
+import { Injectable, computed, signal, inject } from '@angular/core';
+import { ISOSpecification, MEASUREMENT_TYPES, MeasurementType, SpecificationType } from '../models';
 import { FirebaseService } from './firebase.service';
 
 @Injectable({
@@ -13,6 +13,20 @@ export class SpecificationsService {
   private _specifications = signal<ISOSpecification[]>(this.loadFromStorage());
   
   public readonly specifications = this._specifications.asReadonly();
+  public readonly specificationTypes = computed<SpecificationType[]>(() => {
+    const predefined = [...MEASUREMENT_TYPES] as SpecificationType[];
+    const predefinedSet = new Set<string>(MEASUREMENT_TYPES);
+
+    const dynamicTypes = Array.from(
+      new Set(
+        this._specifications()
+          .map(spec => spec.measurementType)
+          .filter(type => !predefinedSet.has(type))
+      )
+    ).sort((a, b) => a.localeCompare(b));
+
+    return [...predefined, ...dynamicTypes];
+  });
 
   constructor() {
     this.initializeFirebaseSync();
@@ -112,6 +126,17 @@ export class SpecificationsService {
         testingProcedure: 'Continuity test from ground point to equipment',
         lastUpdated: new Date().toISOString(),
       },
+      {
+        measurementType: 'dustiness_iso8',
+        displayName: 'Dustiness ISO8',
+        isoStandard: 'ISO 14644-1',
+        standardTitle: 'Cleanrooms - Classification of Air Cleanliness',
+        description: 'ISO Class 8 cleanroom particle concentration limits',
+        requirements: '0.5µm particles: max 3,520,000 per m³, 5µm particles: max 29,300 per m³',
+        testingProcedure: 'Particle counter measurements at designated locations',
+        referenceDocument: 'ISO 14644-1:2015',
+        lastUpdated: new Date().toISOString(),
+      },
     ];
   }
 
@@ -123,8 +148,50 @@ export class SpecificationsService {
     }
   }
 
-  getSpecificationForType(type: MeasurementType): ISOSpecification | undefined {
+  getSpecificationForType(type: SpecificationType): ISOSpecification | undefined {
     return this._specifications().find(spec => spec.measurementType === type);
+  }
+
+  async createSpecificationType(typeKey: string, displayName?: string): Promise<SpecificationType> {
+    const normalizedType = this.normalizeTypeKey(typeKey);
+
+    if (!/^[a-z0-9_]+$/.test(normalizedType)) {
+      throw new Error('specifications.invalidTypeKey');
+    }
+
+    const alreadyExists = this.specificationTypes().includes(normalizedType as SpecificationType);
+    if (alreadyExists) {
+      throw new Error('specifications.duplicateType');
+    }
+
+    const now = new Date().toISOString();
+    const newSpec: ISOSpecification = {
+      measurementType: normalizedType,
+      displayName: displayName?.trim() || this.formatTypeDisplayName(normalizedType),
+      isoStandard: '',
+      standardTitle: '',
+      description: '',
+      requirements: '',
+      testingProcedure: '',
+      referenceDocument: '',
+      lastUpdated: now,
+    };
+
+    this._specifications.update(current => {
+      const updated = [...current, newSpec];
+      this.saveToStorage(updated);
+      return updated;
+    });
+
+    if (this.firebaseService.isFirebaseAvailable()) {
+      try {
+        await this.firebaseService.saveDocument(this.COLLECTION_NAME, normalizedType, newSpec);
+      } catch (error) {
+        console.error('Firebase specification type create error:', error);
+      }
+    }
+
+    return normalizedType;
   }
 
   async addSpecification(spec: Omit<ISOSpecification, 'lastUpdated'>): Promise<void> {
@@ -150,7 +217,7 @@ export class SpecificationsService {
     }
   }
 
-  async updateSpecification(measurementType: MeasurementType, spec: Omit<ISOSpecification, 'lastUpdated'>): Promise<void> {
+  async updateSpecification(measurementType: SpecificationType, spec: Omit<ISOSpecification, 'lastUpdated'>): Promise<void> {
     const updatedSpec: ISOSpecification = {
       ...spec,
       lastUpdated: new Date().toISOString(),
@@ -181,7 +248,7 @@ export class SpecificationsService {
     }
   }
 
-  async deleteSpecification(measurementType: MeasurementType): Promise<void> {
+  async deleteSpecification(measurementType: SpecificationType): Promise<void> {
     this._specifications.update(current => {
       const updated = current.filter(spec => spec.measurementType !== measurementType);
       this.saveToStorage(updated);
@@ -197,5 +264,21 @@ export class SpecificationsService {
         console.error('Firebase specification delete error:', error);
       }
     }
+  }
+
+  private normalizeTypeKey(typeKey: string): string {
+    return typeKey
+      .trim()
+      .toLowerCase()
+      .replace(/[\s-]+/g, '_')
+      .replace(/[^a-z0-9_]/g, '');
+  }
+
+  private formatTypeDisplayName(type: string): string {
+    return type
+      .split('_')
+      .filter(Boolean)
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
   }
 }

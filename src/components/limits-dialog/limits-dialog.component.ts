@@ -1,7 +1,7 @@
 import { Component, ChangeDetectionStrategy, input, output, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { MeasurementType } from '../../models';
+import { MeasurementType, isDustinessMeasurementType } from '../../models';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { LimitsService } from '../../services/limits.service';
 import { TrapFocusDirective } from '../../directives/trap-focus.directive';
@@ -27,9 +27,20 @@ export class LimitsDialogComponent implements OnInit {
   }
 
   private buildForm() {
-    const currentLimits = this.limitsService.getLimitsForType(this.measurementType());
-    
-    switch (this.measurementType()) {
+    const measurementType = this.measurementType();
+    const currentLimits = this.limitsService.getLimitsForType(measurementType);
+
+    if (isDustinessMeasurementType(measurementType)) {
+      this.form = this.fb.group({
+        particles_0_5um_min: [currentLimits?.particles_0_5um_min ?? 0, [Validators.required, Validators.min(0)]],
+        particles_0_5um_max: [currentLimits?.particles_0_5um_max ?? 10200, [Validators.required, Validators.min(0)]],
+        particles_5um_min: [currentLimits?.particles_5um_min ?? 0, [Validators.required, Validators.min(0)]],
+        particles_5um_max: [currentLimits?.particles_5um_max ?? 2930, [Validators.required, Validators.min(0)]],
+      });
+      return;
+    }
+
+    switch (measurementType) {
       case 'temperature_humidity':
         this.form = this.fb.group({
           temperatureMin: [currentLimits?.temperatureMin ?? 15, [Validators.required, Validators.min(-50), Validators.max(100)]],
@@ -42,22 +53,6 @@ export class LimitsDialogComponent implements OnInit {
         this.form = this.fb.group({
           min: [currentLimits?.min ?? 500, [Validators.required, Validators.min(0)]],
           max: [currentLimits?.max ?? 1000, [Validators.required, Validators.min(0)]],
-        });
-        break;
-      case 'dustiness_iso6':
-        this.form = this.fb.group({
-          particles_0_5um_min: [currentLimits?.particles_0_5um_min ?? 0, [Validators.required, Validators.min(0)]],
-          particles_0_5um_max: [currentLimits?.particles_0_5um_max ?? 10200, [Validators.required, Validators.min(0)]],
-          particles_5um_min: [currentLimits?.particles_5um_min ?? 0, [Validators.required, Validators.min(0)]],
-          particles_5um_max: [currentLimits?.particles_5um_max ?? 2930, [Validators.required, Validators.min(0)]],
-        });
-        break;
-      case 'dustiness_iso5':
-        this.form = this.fb.group({
-          particles_0_5um_min: [currentLimits?.particles_0_5um_min ?? 0, [Validators.required, Validators.min(0)]],
-          particles_0_5um_max: [currentLimits?.particles_0_5um_max ?? 3520, [Validators.required, Validators.min(0)]],
-          particles_5um_min: [currentLimits?.particles_5um_min ?? 0, [Validators.required, Validators.min(0)]],
-          particles_5um_max: [currentLimits?.particles_5um_max ?? 293, [Validators.required, Validators.min(0)]],
         });
         break;
       case 'torque':
@@ -84,6 +79,12 @@ export class LimitsDialogComponent implements OnInit {
           balance: [currentLimits?.balance ?? 35, [Validators.required, Validators.min(0)]],
         });
         break;
+      default:
+        this.form = this.fb.group({
+          min: [currentLimits?.min ?? 0, [Validators.required, Validators.min(0)]],
+          max: [currentLimits?.max ?? 100, [Validators.required, Validators.min(0)]],
+        });
+        break;
     }
   }
 
@@ -98,5 +99,9 @@ export class LimitsDialogComponent implements OnInit {
 
   cancel() {
     this.dialogClosed.emit();
+  }
+
+  isDustinessType(type: string): boolean {
+    return isDustinessMeasurementType(type);
   }
 }

@@ -6,7 +6,8 @@ import { ChartConfiguration, ChartType } from 'chart.js';
 import { DataService } from '../../services/data.service';
 import { TranslationService } from '../../services/translation.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
-import { MeasurementType, MEASUREMENT_TYPES } from '../../models';
+import { MeasurementType, MEASUREMENT_TYPES, isDustinessMeasurementType } from '../../models';
+import { SpecificationsService } from '../../services/specifications.service';
 
 @Component({
   selector: 'app-trend-charts',
@@ -18,9 +19,25 @@ import { MeasurementType, MEASUREMENT_TYPES } from '../../models';
 export class TrendChartsComponent {
   private dataService = inject(DataService);
   private translationService = inject(TranslationService);
+  private specificationsService = inject(SpecificationsService);
 
   selectedType = signal<MeasurementType>('temperature_humidity');
-  measurementTypes = MEASUREMENT_TYPES;
+  measurementTypes = computed<MeasurementType[]>(() => {
+    const fromSpecs = this.specificationsService
+      .specificationTypes()
+      .filter(type => this.isSupportedMeasurementType(type)) as MeasurementType[];
+    const fromData = this.dataService
+      .measurements()
+      .map(m => m.type)
+      .filter(type => this.isSupportedMeasurementType(type));
+
+    const merged = Array.from(new Set([...(MEASUREMENT_TYPES as MeasurementType[]), ...fromSpecs, ...fromData]));
+    const selected = this.selectedType();
+    if (!merged.includes(selected)) {
+      this.selectedType.set(merged[0] ?? 'temperature_humidity');
+    }
+    return merged;
+  });
 
   // Line chart configuration
   lineChartType: ChartType = 'line';
@@ -100,38 +117,21 @@ export class TrendChartsComponent {
   barChartData = computed(() => {
     const measurements = this.dataService.measurements();
     const typeCounts = new Map<MeasurementType, number>();
+    const types = this.measurementTypes();
 
-    MEASUREMENT_TYPES.forEach(type => typeCounts.set(type, 0));
+    types.forEach(type => typeCounts.set(type, 0));
     measurements.forEach(m => {
       typeCounts.set(m.type, (typeCounts.get(m.type) || 0) + 1);
     });
 
+    const colors = this.buildTypeColors(types.length);
+
     return {
-      labels: MEASUREMENT_TYPES.map(type => 
-        this.translationService.translate(`measurementNames.${type}`)
-      ),
+      labels: types.map(type => this.getMeasurementTypeName(type)),
       datasets: [{
-        data: MEASUREMENT_TYPES.map(type => typeCounts.get(type) || 0),
-        backgroundColor: [
-          'rgba(255, 99, 132, 0.5)',
-          'rgba(54, 162, 235, 0.5)',
-          'rgba(255, 206, 86, 0.5)',
-          'rgba(75, 192, 192, 0.5)',
-          'rgba(153, 102, 255, 0.5)',
-          'rgba(255, 159, 64, 0.5)',
-          'rgba(199, 199, 199, 0.5)',
-          'rgba(83, 102, 255, 0.5)',
-        ],
-        borderColor: [
-          'rgb(255, 99, 132)',
-          'rgb(54, 162, 235)',
-          'rgb(255, 206, 86)',
-          'rgb(75, 192, 192)',
-          'rgb(153, 102, 255)',
-          'rgb(255, 159, 64)',
-          'rgb(199, 199, 199)',
-          'rgb(83, 102, 255)',
-        ],
+        data: types.map(type => typeCounts.get(type) || 0),
+        backgroundColor: colors.background,
+        borderColor: colors.border,
         borderWidth: 1
       }]
     };
@@ -140,6 +140,24 @@ export class TrendChartsComponent {
   private buildDatasets(measurements: any[]): any[] {
     const type = this.selectedType();
     const datasets: any[] = [];
+
+    if (isDustinessMeasurementType(type)) {
+      datasets.push({
+        data: measurements.map(m => m.particles_0_5um),
+        label: this.translationService.translate('form.particles_0_5um'),
+        borderColor: 'rgb(75, 192, 192)',
+        backgroundColor: 'rgba(75, 192, 192, 0.1)',
+        tension: 0.4
+      });
+      datasets.push({
+        data: measurements.map(m => m.particles_5um),
+        label: this.translationService.translate('form.particles_5um'),
+        borderColor: 'rgb(153, 102, 255)',
+        backgroundColor: 'rgba(153, 102, 255, 0.1)',
+        tension: 0.4
+      });
+      return datasets;
+    }
 
     switch (type) {
       case 'temperature_humidity':
@@ -165,24 +183,6 @@ export class TrendChartsComponent {
           label: this.translationService.translate('form.luminosity'),
           borderColor: 'rgb(255, 206, 86)',
           backgroundColor: 'rgba(255, 206, 86, 0.1)',
-          tension: 0.4
-        });
-        break;
-
-      case 'dustiness_iso6':
-      case 'dustiness_iso5':
-        datasets.push({
-          data: measurements.map(m => m.particles_0_5um),
-          label: this.translationService.translate('form.particles_0_5um'),
-          borderColor: 'rgb(75, 192, 192)',
-          backgroundColor: 'rgba(75, 192, 192, 0.1)',
-          tension: 0.4
-        });
-        datasets.push({
-          data: measurements.map(m => m.particles_5um),
-          label: this.translationService.translate('form.particles_5um'),
-          borderColor: 'rgb(153, 102, 255)',
-          backgroundColor: 'rgba(153, 102, 255, 0.1)',
           tension: 0.4
         });
         break;
@@ -237,6 +237,31 @@ export class TrendChartsComponent {
   }
 
   getMeasurementTypeName(type: MeasurementType): string {
-    return this.translationService.translate(`measurementNames.${type}`);
+    const key = `measurementNames.${type}`;
+    const translated = this.translationService.translate(key);
+    if (translated !== key) {
+      return translated;
+    }
+
+    return type
+      .split('_')
+      .filter(Boolean)
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  }
+
+  private isSupportedMeasurementType(type: string): boolean {
+    return MEASUREMENT_TYPES.includes(type as any) || isDustinessMeasurementType(type);
+  }
+
+  private buildTypeColors(count: number): { background: string[]; border: string[] } {
+    const background: string[] = [];
+    const border: string[] = [];
+    for (let i = 0; i < count; i++) {
+      const hue = Math.round((360 / Math.max(count, 1)) * i);
+      background.push(`hsla(${hue}, 70%, 55%, 0.45)`);
+      border.push(`hsl(${hue}, 70%, 45%)`);
+    }
+    return { background, border };
   }
 }

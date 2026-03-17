@@ -3,7 +3,7 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DataService } from '../../services/data.service';
 import { AuthService } from '../../services/auth.service';
-import { Measurement, MeasurementType, MEASUREMENT_TYPES, TemperatureHumidityMeasurement, LuminosityMeasurement, DustinessISO6Measurement, DustinessISO5Measurement, TorqueMeasurement, SurfaceResistanceMeasurement, GroundingResistanceMeasurement, IonizerMeasurement } from '../../models';
+import { Measurement, MeasurementType, MEASUREMENT_TYPES, isDustinessMeasurement } from '../../models';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { LocaleDatePipe } from '../../pipes/locale-date.pipe';
 import { LocaleNumberPipe } from '../../pipes/locale-number.pipe';
@@ -59,7 +59,10 @@ export class HistoryViewComponent {
   showDeleteConfirm = signal(false);
   deletingMeasurementId = signal<string | null>(null);
   
-  measurementTypes = MEASUREMENT_TYPES;
+  measurementTypes = computed<MeasurementType[]>(() => {
+    const fromData = this.dataService.measurements().map(m => m.type);
+    return Array.from(new Set([...(MEASUREMENT_TYPES as MeasurementType[]), ...fromData]));
+  });
   
   allLocations = computed(() => {
     const locations = this.dataService.measurements().map(m => m.location);
@@ -144,11 +147,13 @@ export class HistoryViewComponent {
   });
   
   private getPrimaryValue(m: Measurement): number {
+    if (isDustinessMeasurement(m)) {
+      return (m.particles_0_5um + m.particles_5um) / 2;
+    }
+
     switch (m.type) {
         case 'temperature_humidity': return m.temperature;
         case 'luminosity': return m.luminosity;
-        case 'dustiness_iso6': return (m.particles_0_5um + m.particles_5um) / 2;
-        case 'dustiness_iso5': return (m.particles_0_5um + m.particles_5um) / 2;
         case 'torque': return m.torqueValue;
         case 'surface_resistance': return m.resistance;
         case 'grounding_resistance': return m.resistance;

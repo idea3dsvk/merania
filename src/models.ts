@@ -1,6 +1,25 @@
-export type MeasurementType = 'temperature_humidity' | 'luminosity' | 'dustiness_iso6' | 'dustiness_iso5' | 'torque' | 'surface_resistance' | 'grounding_resistance' | 'ionizer';
+export const MEASUREMENT_TYPE_VALUES = [
+  'temperature_humidity',
+  'luminosity',
+  'dustiness_iso6',
+  'dustiness_iso5',
+  'torque',
+  'surface_resistance',
+  'grounding_resistance',
+  'ionizer',
+] as const;
 
-export const MEASUREMENT_TYPES: MeasurementType[] = ['temperature_humidity', 'luminosity', 'dustiness_iso6', 'dustiness_iso5', 'torque', 'surface_resistance', 'grounding_resistance', 'ionizer'];
+export type KnownMeasurementType = (typeof MEASUREMENT_TYPE_VALUES)[number];
+export type DustinessMeasurementType = `dustiness_iso${number}`;
+export type MeasurementType = KnownMeasurementType | DustinessMeasurementType;
+
+export const MEASUREMENT_TYPES: KnownMeasurementType[] = [...MEASUREMENT_TYPE_VALUES];
+
+export type SpecificationType = MeasurementType | (string & {});
+
+export function isDustinessMeasurementType(type: string): type is DustinessMeasurementType {
+  return /^dustiness_iso\d+$/.test(type);
+}
 
 export interface BaseMeasurement {
   id: string;
@@ -32,20 +51,8 @@ export interface LuminosityMeasurement extends BaseMeasurement {
   };
 }
 
-export interface DustinessISO6Measurement extends BaseMeasurement {
-  type: 'dustiness_iso6';
-  particles_0_5um: number; // count
-  particles_5um: number; // count
-  limits: {
-    particles_0_5um_min: number;
-    particles_0_5um_max: number;
-    particles_5um_min: number;
-    particles_5um_max: number;
-  };
-}
-
-export interface DustinessISO5Measurement extends BaseMeasurement {
-  type: 'dustiness_iso5';
+export interface DustinessMeasurement extends BaseMeasurement {
+  type: DustinessMeasurementType;
   particles_0_5um: number; // count
   particles_5um: number; // count
   limits: {
@@ -95,11 +102,16 @@ export interface IonizerMeasurement extends BaseMeasurement {
   limits: { decayTime: number; balance: number; };
 }
 
-export type Measurement = TemperatureHumidityMeasurement | LuminosityMeasurement | DustinessISO6Measurement | DustinessISO5Measurement | TorqueMeasurement | SurfaceResistanceMeasurement | GroundingResistanceMeasurement | IonizerMeasurement;
+export type Measurement = TemperatureHumidityMeasurement | LuminosityMeasurement | DustinessMeasurement | TorqueMeasurement | SurfaceResistanceMeasurement | GroundingResistanceMeasurement | IonizerMeasurement;
+
+export function isDustinessMeasurement(measurement: Measurement): measurement is DustinessMeasurement {
+  return isDustinessMeasurementType(measurement.type);
+}
 
 // ISO Standards and Specifications
 export interface ISOSpecification {
-  measurementType: MeasurementType;
+  measurementType: SpecificationType;
+  displayName?: string;
   isoStandard: string; // e.g., "ISO 14644-1"
   standardTitle: string; // e.g., "Classification of air cleanliness"
   description: string; // Detailed description

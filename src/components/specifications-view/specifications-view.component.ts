@@ -5,7 +5,7 @@ import { SpecificationsService } from '../../services/specifications.service';
 import { TranslationService } from '../../services/translation.service';
 import { AuthService } from '../../services/auth.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
-import { MeasurementType, MEASUREMENT_TYPES, ISOSpecification } from '../../models';
+import { SpecificationType } from '../../models';
 
 @Component({
   selector: 'app-specifications-view',
@@ -20,11 +20,18 @@ export class SpecificationsViewComponent {
   private fb = inject(FormBuilder);
 
   specifications = this.specificationsService.specifications;
-  measurementTypes = MEASUREMENT_TYPES;
+  measurementTypes = this.specificationsService.specificationTypes;
 
-  selectedType = signal<MeasurementType | null>(null);
+  selectedType = signal<SpecificationType | null>(null);
   showEditModal = signal(false);
+  showCreateModal = signal(false);
+  createError = signal<string | null>(null);
   editForm!: FormGroup;
+
+  createForm = this.fb.group({
+    measurementType: ['', [Validators.required, Validators.pattern(/^[a-zA-Z0-9_\s-]+$/)]],
+    displayName: ['', [Validators.required]],
+  });
 
   currentSpecification = computed(() => {
     const type = this.selectedType();
@@ -32,7 +39,7 @@ export class SpecificationsViewComponent {
     return this.specificationsService.getSpecificationForType(type);
   });
 
-  openEditModal(type: MeasurementType) {
+  openEditModal(type: SpecificationType) {
     this.selectedType.set(type);
     const spec = this.specificationsService.getSpecificationForType(type);
     
@@ -41,6 +48,7 @@ export class SpecificationsViewComponent {
       standardTitle: [spec?.standardTitle || '', Validators.required],
       description: [spec?.description || '', Validators.required],
       requirements: [spec?.requirements || '', Validators.required],
+      displayName: [spec?.displayName || ''],
       testingProcedure: [spec?.testingProcedure || ''],
       referenceDocument: [spec?.referenceDocument || ''],
     });
@@ -53,10 +61,10 @@ export class SpecificationsViewComponent {
     this.selectedType.set(null);
   }
 
-  onSubmit() {
+  async onSubmit() {
     if (this.editForm.valid && this.selectedType()) {
       const formValue = this.editForm.value;
-      this.specificationsService.updateSpecification(this.selectedType()!, {
+      await this.specificationsService.updateSpecification(this.selectedType()!, {
         measurementType: this.selectedType()!,
         ...formValue,
       });
@@ -64,17 +72,66 @@ export class SpecificationsViewComponent {
     }
   }
 
-  getMeasurementTypeName(type: MeasurementType): string {
-    return this.translationService.translate(`measurementNames.${type}`);
+  openCreateModal(): void {
+    this.createForm.reset({ measurementType: '', displayName: '' });
+    this.createError.set(null);
+    this.showCreateModal.set(true);
+  }
+
+  closeCreateModal(): void {
+    this.showCreateModal.set(false);
+    this.createError.set(null);
+  }
+
+  async onCreateTypeSubmit(): Promise<void> {
+    if (this.createForm.invalid) {
+      this.createForm.markAllAsTouched();
+      return;
+    }
+
+    const measurementType = this.createForm.controls.measurementType.value || '';
+    const displayName = this.createForm.controls.displayName.value || '';
+
+    try {
+      const newType = await this.specificationsService.createSpecificationType(measurementType, displayName);
+      this.closeCreateModal();
+      this.openEditModal(newType);
+    } catch (error) {
+      const errorKey = error instanceof Error ? error.message : 'specifications.createTypeFailed';
+      this.createError.set(this.translationService.translate(errorKey));
+    }
+  }
+
+  getMeasurementTypeName(type: SpecificationType): string {
+    const translationKey = `measurementNames.${type}`;
+    const translatedName = this.translationService.translate(translationKey);
+    if (translatedName !== translationKey) {
+      return translatedName;
+    }
+
+    const specification = this.specificationsService.getSpecificationForType(type);
+    if (specification?.displayName?.trim()) {
+      return specification.displayName.trim();
+    }
+
+    return this.formatTypeName(type);
   }
 
   canEditSpecifications(): boolean {
     return this.authService.canEditSpecifications();
   }
 
-  deleteSpecification(type: MeasurementType) {
+  async deleteSpecification(type: SpecificationType) {
     if (confirm(this.translationService.translate('specifications.confirmDelete'))) {
-      this.specificationsService.deleteSpecification(type);
+      await this.specificationsService.deleteSpecification(type);
     }
+  }
+
+  private formatTypeName(type: string): string {
+    return type
+      .split('_')
+      .filter(Boolean)
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
   }
 }
