@@ -24,7 +24,15 @@ import {
   User as FirebaseUser
 } from 'firebase/auth';
 import { environment } from '../environments/environment';
-import { environment as productionEnvironment } from '../environments/environment.prod';
+
+const FALLBACK_PRODUCTION_FIREBASE_CONFIG = {
+  apiKey: 'AIzaSyClp8810PZUE-52RF1gPJ6dv2iiQb9Ah3k',
+  authDomain: 'merania.firebaseapp.com',
+  projectId: 'merania',
+  storageBucket: 'merania.firebasestorage.app',
+  messagingSenderId: '179511206563',
+  appId: '1:179511206563:web:da8637bdbf28a232c1d516',
+};
 
 @Injectable({
   providedIn: 'root',
@@ -60,9 +68,9 @@ export class FirebaseService {
       return environment.firebase;
     }
 
-    if (this.isValidFirebaseConfig(productionEnvironment.firebase)) {
+    if (this.isValidFirebaseConfig(FALLBACK_PRODUCTION_FIREBASE_CONFIG)) {
       console.warn('Development Firebase config is missing. Falling back to production Firebase config.');
-      return productionEnvironment.firebase;
+      return FALLBACK_PRODUCTION_FIREBASE_CONFIG;
     }
 
     return environment.firebase;
