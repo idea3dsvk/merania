@@ -8,6 +8,7 @@ on:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  NODE_ENV: development
 
 permissions:
   contents: read
@@ -53,7 +54,7 @@ jobs:
           EOF
 
       - name: Install dependencies
-        run: npm ci --include=dev --legacy-peer-deps
+        run: npm install --include=dev --legacy-peer-deps --no-audit --no-fund
 
       - name: Verify build dependencies
         run: |
@@ -64,6 +65,7 @@ jobs:
         run: npm run build:prod
         env:
           NODE_OPTIONS: "--max_old_space_size=4096"
+          CI: "false"
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
