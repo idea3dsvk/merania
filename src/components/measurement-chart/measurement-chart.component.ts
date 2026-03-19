@@ -123,6 +123,22 @@ export class MeasurementChartComponent implements AfterViewInit {
       const particles_0_5um_maxData = measurements.map(() => currentLimits.particles_0_5um_max);
       const particles_5um_minData = measurements.map(() => currentLimits.particles_5um_min);
       const particles_5um_maxData = measurements.map(() => currentLimits.particles_5um_max);
+      const particles_0_5um_ewi = this.resolveEwiPair(
+        currentLimits.particles_0_5um_min,
+        currentLimits.particles_0_5um_max,
+        currentLimits.particles_0_5um_lcl_ewi,
+        currentLimits.particles_0_5um_ucl_ewi
+      );
+      const particles_5um_ewi = this.resolveEwiPair(
+        currentLimits.particles_5um_min,
+        currentLimits.particles_5um_max,
+        currentLimits.particles_5um_lcl_ewi,
+        currentLimits.particles_5um_ucl_ewi
+      );
+      const particles_0_5um_lclEwiData = measurements.map(() => particles_0_5um_ewi.lcl);
+      const particles_0_5um_uclEwiData = measurements.map(() => particles_0_5um_ewi.ucl);
+      const particles_5um_lclEwiData = measurements.map(() => particles_5um_ewi.lcl);
+      const particles_5um_uclEwiData = measurements.map(() => particles_5um_ewi.ucl);
 
       return [
         {
@@ -146,6 +162,34 @@ export class MeasurementChartComponent implements AfterViewInit {
           borderWidth: 2,
           segment: {
             borderDash: [5, 5],
+          }
+        } as any,
+        {
+          data: particles_0_5um_lclEwiData,
+          label: this.translationService.translate('form.particles_0_5um') + ' LCL-EWI',
+          borderColor: 'rgb(245, 158, 11)',
+          backgroundColor: 'transparent',
+          borderDash: [2, 4],
+          fill: false,
+          tension: 0,
+          pointRadius: 0,
+          borderWidth: 2,
+          segment: {
+            borderDash: [2, 4],
+          }
+        } as any,
+        {
+          data: particles_0_5um_uclEwiData,
+          label: this.translationService.translate('form.particles_0_5um') + ' UCL-EWI',
+          borderColor: 'rgb(217, 119, 6)',
+          backgroundColor: 'transparent',
+          borderDash: [2, 4],
+          fill: false,
+          tension: 0,
+          pointRadius: 0,
+          borderWidth: 2,
+          segment: {
+            borderDash: [2, 4],
           }
         } as any,
         {
@@ -186,6 +230,34 @@ export class MeasurementChartComponent implements AfterViewInit {
           }
         } as any,
         {
+          data: particles_5um_lclEwiData,
+          label: this.translationService.translate('form.particles_5um') + ' LCL-EWI',
+          borderColor: 'rgb(245, 158, 11)',
+          backgroundColor: 'transparent',
+          borderDash: [2, 4],
+          fill: false,
+          tension: 0,
+          pointRadius: 0,
+          borderWidth: 2,
+          segment: {
+            borderDash: [2, 4],
+          }
+        } as any,
+        {
+          data: particles_5um_uclEwiData,
+          label: this.translationService.translate('form.particles_5um') + ' UCL-EWI',
+          borderColor: 'rgb(217, 119, 6)',
+          backgroundColor: 'transparent',
+          borderDash: [2, 4],
+          fill: false,
+          tension: 0,
+          pointRadius: 0,
+          borderWidth: 2,
+          segment: {
+            borderDash: [2, 4],
+          }
+        } as any,
+        {
           data: particles_5um_maxData,
           label: this.translationService.translate('form.particles_5um') + ' Max',
           borderColor: 'rgb(185, 28, 28)',
@@ -214,6 +286,22 @@ export class MeasurementChartComponent implements AfterViewInit {
         const tempMaxData = measurements.map(() => currentLimits.temperatureMax);
         const humMinData = measurements.map(() => currentLimits.humidityMin);
         const humMaxData = measurements.map(() => currentLimits.humidityMax);
+        const tempEwi = this.resolveEwiPair(
+          currentLimits.temperatureMin,
+          currentLimits.temperatureMax,
+          currentLimits.temperatureLclEwi,
+          currentLimits.temperatureUclEwi
+        );
+        const humEwi = this.resolveEwiPair(
+          currentLimits.humidityMin,
+          currentLimits.humidityMax,
+          currentLimits.humidityLclEwi,
+          currentLimits.humidityUclEwi
+        );
+        const tempLclEwiData = measurements.map(() => tempEwi.lcl);
+        const tempUclEwiData = measurements.map(() => tempEwi.ucl);
+        const humLclEwiData = measurements.map(() => humEwi.lcl);
+        const humUclEwiData = measurements.map(() => humEwi.ucl);
         
         return [
           {
@@ -237,6 +325,30 @@ export class MeasurementChartComponent implements AfterViewInit {
             yAxisID: 'y',
             pointRadius: 0,
             borderWidth: 3,
+          },
+          {
+            data: tempLclEwiData,
+            label: this.translationService.translate('form.temperature') + ' LCL-EWI',
+            borderColor: 'rgb(245, 158, 11)',
+            backgroundColor: 'transparent',
+            borderDash: [2, 4],
+            fill: false,
+            tension: 0,
+            yAxisID: 'y',
+            pointRadius: 0,
+            borderWidth: 2,
+          },
+          {
+            data: tempUclEwiData,
+            label: this.translationService.translate('form.temperature') + ' UCL-EWI',
+            borderColor: 'rgb(217, 119, 6)',
+            backgroundColor: 'transparent',
+            borderDash: [2, 4],
+            fill: false,
+            tension: 0,
+            yAxisID: 'y',
+            pointRadius: 0,
+            borderWidth: 2,
           },
           {
             data: tempMaxData,
@@ -273,6 +385,30 @@ export class MeasurementChartComponent implements AfterViewInit {
             borderWidth: 3,
           },
           {
+            data: humLclEwiData,
+            label: this.translationService.translate('form.humidity') + ' LCL-EWI',
+            borderColor: 'rgb(6, 182, 212)',
+            backgroundColor: 'transparent',
+            borderDash: [2, 4],
+            fill: false,
+            tension: 0,
+            yAxisID: 'y1',
+            pointRadius: 0,
+            borderWidth: 2,
+          },
+          {
+            data: humUclEwiData,
+            label: this.translationService.translate('form.humidity') + ' UCL-EWI',
+            borderColor: 'rgb(14, 116, 144)',
+            backgroundColor: 'transparent',
+            borderDash: [2, 4],
+            fill: false,
+            tension: 0,
+            yAxisID: 'y1',
+            pointRadius: 0,
+            borderWidth: 2,
+          },
+          {
             data: humMaxData,
             label: this.translationService.translate('form.humidityMax'),
             borderColor: 'rgb(8, 145, 178)',
@@ -294,6 +430,9 @@ export class MeasurementChartComponent implements AfterViewInit {
         const lumData = measurements.map((m: any) => m.luminosity);
         const minData = measurements.map(() => currentLimits.min);
         const maxData = measurements.map(() => currentLimits.max);
+        const ewi = this.resolveEwiPair(currentLimits.min, currentLimits.max, currentLimits.lclEwi, currentLimits.uclEwi);
+        const lclEwiData = measurements.map(() => ewi.lcl);
+        const uclEwiData = measurements.map(() => ewi.ucl);
         
         return [
           {
@@ -317,6 +456,34 @@ export class MeasurementChartComponent implements AfterViewInit {
             borderWidth: 2,
             segment: {
               borderDash: [5, 5],
+            }
+          } as any,
+          {
+            data: lclEwiData,
+            label: this.translationService.translate('form.luminosity') + ' LCL-EWI',
+            borderColor: 'rgb(245, 158, 11)',
+            backgroundColor: 'transparent',
+            borderDash: [2, 4],
+            fill: false,
+            tension: 0,
+            pointRadius: 0,
+            borderWidth: 2,
+            segment: {
+              borderDash: [2, 4],
+            }
+          } as any,
+          {
+            data: uclEwiData,
+            label: this.translationService.translate('form.luminosity') + ' UCL-EWI',
+            borderColor: 'rgb(217, 119, 6)',
+            backgroundColor: 'transparent',
+            borderDash: [2, 4],
+            fill: false,
+            tension: 0,
+            pointRadius: 0,
+            borderWidth: 2,
+            segment: {
+              borderDash: [2, 4],
             }
           } as any,
           {
@@ -346,6 +513,22 @@ export class MeasurementChartComponent implements AfterViewInit {
         const particles_0_5um_maxData = measurements.map(() => currentLimits.particles_0_5um_max);
         const particles_5um_minData = measurements.map(() => currentLimits.particles_5um_min);
         const particles_5um_maxData = measurements.map(() => currentLimits.particles_5um_max);
+        const particles_0_5um_ewi = this.resolveEwiPair(
+          currentLimits.particles_0_5um_min,
+          currentLimits.particles_0_5um_max,
+          currentLimits.particles_0_5um_lcl_ewi,
+          currentLimits.particles_0_5um_ucl_ewi
+        );
+        const particles_5um_ewi = this.resolveEwiPair(
+          currentLimits.particles_5um_min,
+          currentLimits.particles_5um_max,
+          currentLimits.particles_5um_lcl_ewi,
+          currentLimits.particles_5um_ucl_ewi
+        );
+        const particles_0_5um_lclEwiData = measurements.map(() => particles_0_5um_ewi.lcl);
+        const particles_0_5um_uclEwiData = measurements.map(() => particles_0_5um_ewi.ucl);
+        const particles_5um_lclEwiData = measurements.map(() => particles_5um_ewi.lcl);
+        const particles_5um_uclEwiData = measurements.map(() => particles_5um_ewi.ucl);
         
         return [
           {
@@ -369,6 +552,34 @@ export class MeasurementChartComponent implements AfterViewInit {
             borderWidth: 2,
             segment: {
               borderDash: [5, 5],
+            }
+          } as any,
+          {
+            data: particles_0_5um_lclEwiData,
+            label: this.translationService.translate('form.particles_0_5um') + ' LCL-EWI',
+            borderColor: 'rgb(245, 158, 11)',
+            backgroundColor: 'transparent',
+            borderDash: [2, 4],
+            fill: false,
+            tension: 0,
+            pointRadius: 0,
+            borderWidth: 2,
+            segment: {
+              borderDash: [2, 4],
+            }
+          } as any,
+          {
+            data: particles_0_5um_uclEwiData,
+            label: this.translationService.translate('form.particles_0_5um') + ' UCL-EWI',
+            borderColor: 'rgb(217, 119, 6)',
+            backgroundColor: 'transparent',
+            borderDash: [2, 4],
+            fill: false,
+            tension: 0,
+            pointRadius: 0,
+            borderWidth: 2,
+            segment: {
+              borderDash: [2, 4],
             }
           } as any,
           {
@@ -409,6 +620,34 @@ export class MeasurementChartComponent implements AfterViewInit {
             }
           } as any,
           {
+            data: particles_5um_lclEwiData,
+            label: this.translationService.translate('form.particles_5um') + ' LCL-EWI',
+            borderColor: 'rgb(245, 158, 11)',
+            backgroundColor: 'transparent',
+            borderDash: [2, 4],
+            fill: false,
+            tension: 0,
+            pointRadius: 0,
+            borderWidth: 2,
+            segment: {
+              borderDash: [2, 4],
+            }
+          } as any,
+          {
+            data: particles_5um_uclEwiData,
+            label: this.translationService.translate('form.particles_5um') + ' UCL-EWI',
+            borderColor: 'rgb(217, 119, 6)',
+            backgroundColor: 'transparent',
+            borderDash: [2, 4],
+            fill: false,
+            tension: 0,
+            pointRadius: 0,
+            borderWidth: 2,
+            segment: {
+              borderDash: [2, 4],
+            }
+          } as any,
+          {
             data: particles_5um_maxData,
             label: this.translationService.translate('form.particles_5um') + ' Max',
             borderColor: 'rgb(185, 28, 28)',
@@ -435,6 +674,22 @@ export class MeasurementChartComponent implements AfterViewInit {
         const particles_0_5um_maxData = measurements.map(() => currentLimits.particles_0_5um_max);
         const particles_5um_minData = measurements.map(() => currentLimits.particles_5um_min);
         const particles_5um_maxData = measurements.map(() => currentLimits.particles_5um_max);
+        const particles_0_5um_ewi = this.resolveEwiPair(
+          currentLimits.particles_0_5um_min,
+          currentLimits.particles_0_5um_max,
+          currentLimits.particles_0_5um_lcl_ewi,
+          currentLimits.particles_0_5um_ucl_ewi
+        );
+        const particles_5um_ewi = this.resolveEwiPair(
+          currentLimits.particles_5um_min,
+          currentLimits.particles_5um_max,
+          currentLimits.particles_5um_lcl_ewi,
+          currentLimits.particles_5um_ucl_ewi
+        );
+        const particles_0_5um_lclEwiData = measurements.map(() => particles_0_5um_ewi.lcl);
+        const particles_0_5um_uclEwiData = measurements.map(() => particles_0_5um_ewi.ucl);
+        const particles_5um_lclEwiData = measurements.map(() => particles_5um_ewi.lcl);
+        const particles_5um_uclEwiData = measurements.map(() => particles_5um_ewi.ucl);
         
         return [
           {
@@ -458,6 +713,34 @@ export class MeasurementChartComponent implements AfterViewInit {
             borderWidth: 2,
             segment: {
               borderDash: [5, 5],
+            }
+          } as any,
+          {
+            data: particles_0_5um_lclEwiData,
+            label: this.translationService.translate('form.particles_0_5um') + ' LCL-EWI',
+            borderColor: 'rgb(245, 158, 11)',
+            backgroundColor: 'transparent',
+            borderDash: [2, 4],
+            fill: false,
+            tension: 0,
+            pointRadius: 0,
+            borderWidth: 2,
+            segment: {
+              borderDash: [2, 4],
+            }
+          } as any,
+          {
+            data: particles_0_5um_uclEwiData,
+            label: this.translationService.translate('form.particles_0_5um') + ' UCL-EWI',
+            borderColor: 'rgb(217, 119, 6)',
+            backgroundColor: 'transparent',
+            borderDash: [2, 4],
+            fill: false,
+            tension: 0,
+            pointRadius: 0,
+            borderWidth: 2,
+            segment: {
+              borderDash: [2, 4],
             }
           } as any,
           {
@@ -498,6 +781,34 @@ export class MeasurementChartComponent implements AfterViewInit {
             }
           } as any,
           {
+            data: particles_5um_lclEwiData,
+            label: this.translationService.translate('form.particles_5um') + ' LCL-EWI',
+            borderColor: 'rgb(245, 158, 11)',
+            backgroundColor: 'transparent',
+            borderDash: [2, 4],
+            fill: false,
+            tension: 0,
+            pointRadius: 0,
+            borderWidth: 2,
+            segment: {
+              borderDash: [2, 4],
+            }
+          } as any,
+          {
+            data: particles_5um_uclEwiData,
+            label: this.translationService.translate('form.particles_5um') + ' UCL-EWI',
+            borderColor: 'rgb(217, 119, 6)',
+            backgroundColor: 'transparent',
+            borderDash: [2, 4],
+            fill: false,
+            tension: 0,
+            pointRadius: 0,
+            borderWidth: 2,
+            segment: {
+              borderDash: [2, 4],
+            }
+          } as any,
+          {
             data: particles_5um_maxData,
             label: this.translationService.translate('form.particles_5um') + ' Max',
             borderColor: 'rgb(185, 28, 28)',
@@ -521,6 +832,9 @@ export class MeasurementChartComponent implements AfterViewInit {
         const torqueData = measurements.map((m: any) => m.torqueValue);
         const minData = measurements.map(() => currentLimits.min);
         const maxData = measurements.map(() => currentLimits.max);
+        const ewi = this.resolveEwiPair(currentLimits.min, currentLimits.max, currentLimits.lclEwi, currentLimits.uclEwi);
+        const lclEwiData = measurements.map(() => ewi.lcl);
+        const uclEwiData = measurements.map(() => ewi.ucl);
         
         return [
           {
@@ -547,6 +861,34 @@ export class MeasurementChartComponent implements AfterViewInit {
             }
           } as any,
           {
+            data: lclEwiData,
+            label: this.translationService.translate('form.torque') + ' LCL-EWI',
+            borderColor: 'rgb(245, 158, 11)',
+            backgroundColor: 'transparent',
+            borderDash: [2, 4],
+            fill: false,
+            tension: 0,
+            pointRadius: 0,
+            borderWidth: 2,
+            segment: {
+              borderDash: [2, 4],
+            }
+          } as any,
+          {
+            data: uclEwiData,
+            label: this.translationService.translate('form.torque') + ' UCL-EWI',
+            borderColor: 'rgb(217, 119, 6)',
+            backgroundColor: 'transparent',
+            borderDash: [2, 4],
+            fill: false,
+            tension: 0,
+            pointRadius: 0,
+            borderWidth: 2,
+            segment: {
+              borderDash: [2, 4],
+            }
+          } as any,
+          {
             data: maxData,
             label: this.translationService.translate('form.torqueMax'),
             borderColor: 'rgb(220, 38, 38)',
@@ -570,6 +912,9 @@ export class MeasurementChartComponent implements AfterViewInit {
         const resistanceData = measurements.map((m: any) => m.resistance);
         const minData = measurements.map(() => currentLimits.min);
         const maxData = measurements.map(() => currentLimits.max);
+        const ewi = this.resolveEwiPair(currentLimits.min, currentLimits.max, currentLimits.lclEwi, currentLimits.uclEwi);
+        const lclEwiData = measurements.map(() => ewi.lcl);
+        const uclEwiData = measurements.map(() => ewi.ucl);
         
         return [
           {
@@ -593,6 +938,34 @@ export class MeasurementChartComponent implements AfterViewInit {
             borderWidth: 2,
             segment: {
               borderDash: [5, 5],
+            }
+          } as any,
+          {
+            data: lclEwiData,
+            label: this.translationService.translate('form.resistance') + ' LCL-EWI',
+            borderColor: 'rgb(245, 158, 11)',
+            backgroundColor: 'transparent',
+            borderDash: [2, 4],
+            fill: false,
+            tension: 0,
+            pointRadius: 0,
+            borderWidth: 2,
+            segment: {
+              borderDash: [2, 4],
+            }
+          } as any,
+          {
+            data: uclEwiData,
+            label: this.translationService.translate('form.resistance') + ' UCL-EWI',
+            borderColor: 'rgb(217, 119, 6)',
+            backgroundColor: 'transparent',
+            borderDash: [2, 4],
+            fill: false,
+            tension: 0,
+            pointRadius: 0,
+            borderWidth: 2,
+            segment: {
+              borderDash: [2, 4],
             }
           } as any,
           {
@@ -619,6 +992,9 @@ export class MeasurementChartComponent implements AfterViewInit {
         const resistanceData = measurements.map((m: any) => m.resistance);
         const minData = measurements.map(() => currentLimits.min);
         const maxData = measurements.map(() => currentLimits.max);
+        const ewi = this.resolveEwiPair(currentLimits.min, currentLimits.max, currentLimits.lclEwi, currentLimits.uclEwi);
+        const lclEwiData = measurements.map(() => ewi.lcl);
+        const uclEwiData = measurements.map(() => ewi.ucl);
         
         return [
           {
@@ -642,6 +1018,34 @@ export class MeasurementChartComponent implements AfterViewInit {
             borderWidth: 2,
             segment: {
               borderDash: [5, 5],
+            }
+          } as any,
+          {
+            data: lclEwiData,
+            label: this.translationService.translate('form.resistance') + ' LCL-EWI',
+            borderColor: 'rgb(245, 158, 11)',
+            backgroundColor: 'transparent',
+            borderDash: [2, 4],
+            fill: false,
+            tension: 0,
+            pointRadius: 0,
+            borderWidth: 2,
+            segment: {
+              borderDash: [2, 4],
+            }
+          } as any,
+          {
+            data: uclEwiData,
+            label: this.translationService.translate('form.resistance') + ' UCL-EWI',
+            borderColor: 'rgb(217, 119, 6)',
+            backgroundColor: 'transparent',
+            borderDash: [2, 4],
+            fill: false,
+            tension: 0,
+            pointRadius: 0,
+            borderWidth: 2,
+            segment: {
+              borderDash: [2, 4],
             }
           } as any,
           {
@@ -741,5 +1145,26 @@ export class MeasurementChartComponent implements AfterViewInit {
       .filter(Boolean)
       .map(word => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ');
+  }
+
+  private resolveEwiPair(
+    min: number,
+    max: number,
+    explicitLcl?: number,
+    explicitUcl?: number
+  ): { lcl: number; ucl: number } {
+    const lower = Number.isFinite(min) ? min : 0;
+    const upper = Number.isFinite(max) ? max : lower;
+
+    if (Number.isFinite(explicitLcl) && Number.isFinite(explicitUcl)) {
+      return { lcl: explicitLcl as number, ucl: explicitUcl as number };
+    }
+
+    const span = upper - lower;
+    const warningOffset = span > 0 ? span * 0.2 : 0;
+    return {
+      lcl: lower + warningOffset,
+      ucl: upper - warningOffset,
+    };
   }
 }
