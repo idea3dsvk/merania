@@ -1,0 +1,80 @@
+{
+  "configVersion": 1,
+  "timestamp": 1773922579716,
+  "index": "/merania/index.html",
+  "assetGroups": [
+    {
+      "name": "app",
+      "installMode": "prefetch",
+      "updateMode": "prefetch",
+      "cacheQueryOptions": {
+        "ignoreVary": true
+      },
+      "urls": [
+        "/merania/chunk-C6Q5SG76.js",
+        "/merania/chunk-FK6H3RFT.js",
+        "/merania/chunk-GPXMSDNG.js",
+        "/merania/chunk-MJAV6IYW.js",
+        "/merania/chunk-Z2AJTRIO.js",
+        "/merania/index.html",
+        "/merania/main-EABEMKM6.js"
+      ],
+      "patterns": []
+    },
+    {
+      "name": "assets",
+      "installMode": "lazy",
+      "updateMode": "prefetch",
+      "cacheQueryOptions": {
+        "ignoreVary": true
+      },
+      "urls": [],
+      "patterns": []
+    }
+  ],
+  "dataGroups": [
+    {
+      "name": "api-firebase",
+      "patterns": [
+        "https:\\/\\/firestore\\.googleapis\\.com\\/.*",
+        "https:\\/\\/[^/]*\\.firebaseio\\.com\\/.*"
+      ],
+      "strategy": "freshness",
+      "maxSize": 100,
+      "maxAge": 21600000,
+      "timeoutMs": 10000,
+      "cacheQueryOptions": {
+        "ignoreVary": true
+      },
+      "version": 1
+    }
+  ],
+  "hashTable": {
+    "/merania/chunk-C6Q5SG76.js": "fd4fc33dfc3c6ef846db1272f907a0dbbbb1e374",
+    "/merania/chunk-FK6H3RFT.js": "3c538698719f1cf34410542b8c702bc484e025ee",
+    "/merania/chunk-GPXMSDNG.js": "1a48f7a7bc778bb84d553e8e0c9a1a2b4f23f174",
+    "/merania/chunk-MJAV6IYW.js": "acac7f3014887b9858dd647950223198dd04f8ef",
+    "/merania/chunk-Z2AJTRIO.js": "616af4105b1f23b2303c601e4451ff8d5481f4d2",
+    "/merania/index.html": "1edfa76c7ecc4ea095e0bde5c1e797533211cc59",
+    "/merania/main-EABEMKM6.js": "af0ab36dc814eefe95997b8d5681e4ea70c9f050"
+  },
+  "navigationUrls": [
+    {
+      "positive": true,
+      "regex": "^\\/.*$"
+    },
+    {
+      "positive": false,
+      "regex": "^\\/(?:.+\\/)?[^/]*\\.[^/]*$"
+    },
+    {
+      "positive": false,
+      "regex": "^\\/(?:.+\\/)?[^/]*__[^/]*$"
+    },
+    {
+      "positive": false,
+      "regex": "^\\/(?:.+\\/)?[^/]*__[^/]*\\/.*$"
+    }
+  ],
+  "navigationRequestStrategy": "performance"
+}
