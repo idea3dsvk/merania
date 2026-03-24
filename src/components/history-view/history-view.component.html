@@ -3,7 +3,7 @@
   @if (filterType() !== 'all') {
     <div class="grid grid-cols-1 gap-6">
       <app-measurement-chart 
-        [measurements]="dataService.measurements()"
+        [measurements]="filteredMeasurements()"
         [measurementType]="filterType()"
       />
     </div>
@@ -12,7 +12,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       @for (type of measurementTypes(); track type) {
         <app-measurement-chart 
-          [measurements]="dataService.measurements()"
+          [measurements]="filteredMeasurements()"
           [measurementType]="type"
         />
       }
