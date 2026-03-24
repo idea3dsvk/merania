@@ -1074,6 +1074,23 @@ export class MeasurementChartComponent implements AfterViewInit {
         const decayNegData = measurements.map((m: any) => m.decayTimeNegative);
         const balanceLimitData = measurements.map(() => currentLimits.balance);
         const decayLimitData = measurements.map(() => currentLimits.decayTime);
+        const balanceAbs = Math.abs(currentLimits.balance ?? 0);
+        const balanceEwi = this.resolveEwiPair(
+          -balanceAbs,
+          balanceAbs,
+          currentLimits.balanceLclEwi,
+          currentLimits.balanceUclEwi
+        );
+        const decayEwi = this.resolveEwiPair(
+          0,
+          currentLimits.decayTime,
+          currentLimits.decayTimeLclEwi,
+          currentLimits.decayTimeUclEwi
+        );
+        const balanceLclEwiData = measurements.map(() => balanceEwi.lcl);
+        const balanceUclEwiData = measurements.map(() => balanceEwi.ucl);
+        const decayLclEwiData = measurements.map(() => decayEwi.lcl);
+        const decayUclEwiData = measurements.map(() => decayEwi.ucl);
         
         return [
           {
@@ -1091,6 +1108,28 @@ export class MeasurementChartComponent implements AfterViewInit {
             borderColor: 'rgb(109, 40, 217)',
             backgroundColor: 'transparent',
             borderDash: [5, 5],
+            fill: false,
+            tension: 0,
+            pointRadius: 0,
+            borderWidth: 2,
+          },
+          {
+            data: balanceLclEwiData,
+            label: this.translationService.translate('form.balanceLclEwi'),
+            borderColor: 'rgb(245, 158, 11)',
+            backgroundColor: 'transparent',
+            borderDash: [2, 4],
+            fill: false,
+            tension: 0,
+            pointRadius: 0,
+            borderWidth: 2,
+          },
+          {
+            data: balanceUclEwiData,
+            label: this.translationService.translate('form.balanceUclEwi'),
+            borderColor: 'rgb(217, 119, 6)',
+            backgroundColor: 'transparent',
+            borderDash: [2, 4],
             fill: false,
             tension: 0,
             pointRadius: 0,
@@ -1120,6 +1159,28 @@ export class MeasurementChartComponent implements AfterViewInit {
             borderColor: 'rgb(239, 68, 68)',
             backgroundColor: 'transparent',
             borderDash: [5, 5],
+            fill: false,
+            tension: 0,
+            pointRadius: 0,
+            borderWidth: 2,
+          },
+          {
+            data: decayLclEwiData,
+            label: this.translationService.translate('form.decayTimeLclEwi'),
+            borderColor: 'rgb(245, 158, 11)',
+            backgroundColor: 'transparent',
+            borderDash: [2, 4],
+            fill: false,
+            tension: 0,
+            pointRadius: 0,
+            borderWidth: 2,
+          },
+          {
+            data: decayUclEwiData,
+            label: this.translationService.translate('form.decayTimeUclEwi'),
+            borderColor: 'rgb(217, 119, 6)',
+            backgroundColor: 'transparent',
+            borderDash: [2, 4],
             fill: false,
             tension: 0,
             pointRadius: 0,

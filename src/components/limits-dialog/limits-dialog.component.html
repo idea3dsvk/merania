@@ -170,6 +170,139 @@
         }
       }
 
+      @if (form.get('temperatureLclEwi') && form.get('temperatureUclEwi')) {
+        <div class="space-y-4 p-4 rounded-md border border-amber-200 bg-amber-50">
+          <div class="text-sm font-medium text-gray-700">{{ 'form.temperature' | translate }} - EWI</div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label for="temperatureLclEwi" class="block text-sm font-medium text-gray-700">{{ 'form.temperatureLclEwi' | translate }}</label>
+              <input type="number" id="temperatureLclEwi" formControlName="temperatureLclEwi" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" step="0.1">
+            </div>
+            <div>
+              <label for="temperatureUclEwi" class="block text-sm font-medium text-gray-700">{{ 'form.temperatureUclEwi' | translate }}</label>
+              <input type="number" id="temperatureUclEwi" formControlName="temperatureUclEwi" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" step="0.1">
+            </div>
+          </div>
+          @if (form.hasError('temperatureEwiInvalid')) {
+            <p class="text-sm text-red-600">EWI values must be inside Min/Max and LCL-EWI must be lower than UCL-EWI.</p>
+          }
+        </div>
+      }
+
+      @if (form.get('humidityLclEwi') && form.get('humidityUclEwi')) {
+        <div class="space-y-4 p-4 rounded-md border border-amber-200 bg-amber-50">
+          <div class="text-sm font-medium text-gray-700">{{ 'form.humidity' | translate }} - EWI</div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label for="humidityLclEwi" class="block text-sm font-medium text-gray-700">{{ 'form.humidityLclEwi' | translate }}</label>
+              <input type="number" id="humidityLclEwi" formControlName="humidityLclEwi" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+            </div>
+            <div>
+              <label for="humidityUclEwi" class="block text-sm font-medium text-gray-700">{{ 'form.humidityUclEwi' | translate }}</label>
+              <input type="number" id="humidityUclEwi" formControlName="humidityUclEwi" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+            </div>
+          </div>
+          @if (form.hasError('humidityEwiInvalid')) {
+            <p class="text-sm text-red-600">EWI values must be inside Min/Max and LCL-EWI must be lower than UCL-EWI.</p>
+          }
+        </div>
+      }
+
+      @if (form.get('lclEwi') && form.get('uclEwi')) {
+        <div class="space-y-4 p-4 rounded-md border border-amber-200 bg-amber-50">
+          <div class="text-sm font-medium text-gray-700">EWI</div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label for="lclEwi" class="block text-sm font-medium text-gray-700">{{ 'form.lclEwi' | translate }}</label>
+              <input type="number" id="lclEwi" formControlName="lclEwi" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" step="0.1">
+            </div>
+            <div>
+              <label for="uclEwi" class="block text-sm font-medium text-gray-700">{{ 'form.uclEwi' | translate }}</label>
+              <input type="number" id="uclEwi" formControlName="uclEwi" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" step="0.1">
+            </div>
+          </div>
+          @if (form.hasError('genericEwiInvalid')) {
+            <p class="text-sm text-red-600">EWI values must be inside Min/Max and LCL-EWI must be lower than UCL-EWI.</p>
+          }
+        </div>
+      }
+
+      @if (form.get('particles_0_5um_lcl_ewi') && form.get('particles_0_5um_ucl_ewi')) {
+        <div class="space-y-4 p-4 rounded-md border border-amber-200 bg-amber-50">
+          <div class="text-sm font-medium text-gray-700">{{ 'form.particles_0_5um' | translate }} - EWI</div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label for="particles_0_5um_lcl_ewi" class="block text-sm font-medium text-gray-700">{{ 'form.lclEwi' | translate }}</label>
+              <input type="number" id="particles_0_5um_lcl_ewi" formControlName="particles_0_5um_lcl_ewi" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+            </div>
+            <div>
+              <label for="particles_0_5um_ucl_ewi" class="block text-sm font-medium text-gray-700">{{ 'form.uclEwi' | translate }}</label>
+              <input type="number" id="particles_0_5um_ucl_ewi" formControlName="particles_0_5um_ucl_ewi" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+            </div>
+          </div>
+          @if (form.hasError('particles05EwiInvalid')) {
+            <p class="text-sm text-red-600">EWI values must be inside Min/Max and LCL-EWI must be lower than UCL-EWI.</p>
+          }
+        </div>
+      }
+
+      @if (form.get('particles_5um_lcl_ewi') && form.get('particles_5um_ucl_ewi')) {
+        <div class="space-y-4 p-4 rounded-md border border-amber-200 bg-amber-50">
+          <div class="text-sm font-medium text-gray-700">{{ 'form.particles_5um' | translate }} - EWI</div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label for="particles_5um_lcl_ewi" class="block text-sm font-medium text-gray-700">{{ 'form.lclEwi' | translate }}</label>
+              <input type="number" id="particles_5um_lcl_ewi" formControlName="particles_5um_lcl_ewi" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+            </div>
+            <div>
+              <label for="particles_5um_ucl_ewi" class="block text-sm font-medium text-gray-700">{{ 'form.uclEwi' | translate }}</label>
+              <input type="number" id="particles_5um_ucl_ewi" formControlName="particles_5um_ucl_ewi" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+            </div>
+          </div>
+          @if (form.hasError('particles5EwiInvalid')) {
+            <p class="text-sm text-red-600">EWI values must be inside Min/Max and LCL-EWI must be lower than UCL-EWI.</p>
+          }
+        </div>
+      }
+
+      @if (form.get('decayTimeLclEwi') && form.get('decayTimeUclEwi')) {
+        <div class="space-y-4 p-4 rounded-md border border-amber-200 bg-amber-50">
+          <div class="text-sm font-medium text-gray-700">{{ 'form.decayTimeLimit' | translate }} - EWI</div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label for="decayTimeLclEwi" class="block text-sm font-medium text-gray-700">{{ 'form.decayTimeLclEwi' | translate }}</label>
+              <input type="number" id="decayTimeLclEwi" formControlName="decayTimeLclEwi" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" step="0.1">
+            </div>
+            <div>
+              <label for="decayTimeUclEwi" class="block text-sm font-medium text-gray-700">{{ 'form.decayTimeUclEwi' | translate }}</label>
+              <input type="number" id="decayTimeUclEwi" formControlName="decayTimeUclEwi" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" step="0.1">
+            </div>
+          </div>
+          @if (form.hasError('decayEwiInvalid')) {
+            <p class="text-sm text-red-600">EWI values must be inside the decay limit and LCL-EWI must be lower than UCL-EWI.</p>
+          }
+        </div>
+      }
+
+      @if (form.get('balanceLclEwi') && form.get('balanceUclEwi')) {
+        <div class="space-y-4 p-4 rounded-md border border-amber-200 bg-amber-50">
+          <div class="text-sm font-medium text-gray-700">{{ 'form.balanceLimit' | translate }} - EWI</div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label for="balanceLclEwi" class="block text-sm font-medium text-gray-700">{{ 'form.balanceLclEwi' | translate }}</label>
+              <input type="number" id="balanceLclEwi" formControlName="balanceLclEwi" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" step="0.1">
+            </div>
+            <div>
+              <label for="balanceUclEwi" class="block text-sm font-medium text-gray-700">{{ 'form.balanceUclEwi' | translate }}</label>
+              <input type="number" id="balanceUclEwi" formControlName="balanceUclEwi" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" step="0.1">
+            </div>
+          </div>
+          @if (form.hasError('balanceEwiInvalid')) {
+            <p class="text-sm text-red-600">EWI values must be inside +/- Balance limit and LCL-EWI must be lower than UCL-EWI.</p>
+          }
+        </div>
+      }
+
       <div class="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 pt-4 border-t mt-6 sticky bottom-0 bg-white pb-4 sm:pb-0">
         <button type="button" (click)="cancel()" class="w-full sm:w-auto bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
           {{ 'form.cancel' | translate }}
