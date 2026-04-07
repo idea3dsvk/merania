@@ -5,7 +5,7 @@ import { AuthService } from '../../services/auth.service';
 import { MeasurementFormComponent } from '../measurement-form/measurement-form.component';
 import { MeasurementCardComponent, SummaryData } from '../measurement-card/measurement-card.component';
 import { LimitsDialogComponent } from '../limits-dialog/limits-dialog.component';
-import { Measurement, MeasurementType, MEASUREMENT_TYPES, isDustinessMeasurement, isDustinessMeasurementType } from '../../models';
+import { Measurement, MeasurementType, MEASUREMENT_TYPES, isDustinessMeasurement, isDustinessMeasurementType, isLuminosityMeasurement, isLuminosityMeasurementType } from '../../models';
 import { TranslationService } from '../../services/translation.service';
 import { LimitsService } from '../../services/limits.service';
 import { SpecificationsService } from '../../services/specifications.service';
@@ -150,13 +150,15 @@ export class DashboardComponent implements OnInit {
 
   private getLatestValueString(m: Measurement | undefined): string {
     if (!m) return this.translationService.translate('dashboard.noData');
+    if (isLuminosityMeasurement(m)) {
+      return `${m.luminosity} lx`;
+    }
     if (isDustinessMeasurement(m)) {
       return `0.5µm: ${m.particles_0_5um} / 5µm: ${m.particles_5um}`;
     }
 
     switch (m.type) {
       case 'temperature_humidity': return `${m.temperature}°C / ${m.humidity}%`;
-      case 'luminosity': return `${m.luminosity} lx`;
       case 'torque': return `${m.torqueValue} Nm`;
       case 'surface_resistance': return `${m.resistance.toExponential(1)} Ω`;
       case 'grounding_resistance': return `${m.resistance} Ω`;
@@ -175,13 +177,14 @@ export class DashboardComponent implements OnInit {
       return m.particles_0_5um < limits.particles_0_5um_min || m.particles_0_5um > limits.particles_0_5um_max ||
              m.particles_5um < limits.particles_5um_min || m.particles_5um > limits.particles_5um_max;
     }
+    if (isLuminosityMeasurement(m)) {
+      return m.luminosity < limits.min || m.luminosity > limits.max;
+    }
     
     switch (m.type) {
       case 'temperature_humidity':
         return m.temperature < limits.temperatureMin || m.temperature > limits.temperatureMax ||
                m.humidity < limits.humidityMin || m.humidity > limits.humidityMax;
-      case 'luminosity':
-        return m.luminosity < limits.min || m.luminosity > limits.max;
       case 'torque': 
         return m.torqueValue < limits.min || m.torqueValue > limits.max;
       case 'surface_resistance': 
@@ -196,6 +199,6 @@ export class DashboardComponent implements OnInit {
   }
 
   private isSupportedMeasurementType(type: string): boolean {
-    return MEASUREMENT_TYPES.includes(type as any) || isDustinessMeasurementType(type);
+    return MEASUREMENT_TYPES.includes(type as any) || isDustinessMeasurementType(type) || isLuminosityMeasurementType(type);
   }
 }

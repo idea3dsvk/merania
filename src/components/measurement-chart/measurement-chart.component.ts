@@ -2,7 +2,7 @@ import { Component, ChangeDetectionStrategy, input, computed, ViewChild, AfterVi
 import { CommonModule } from '@angular/common';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartType } from 'chart.js';
-import { Measurement, MeasurementType, isDustinessMeasurementType } from '../../models';
+import { Measurement, MeasurementType, isDustinessMeasurementType, isLuminosityMeasurementType } from '../../models';
 import { TranslationService } from '../../services/translation.service';
 import { LimitsService } from '../../services/limits.service';
 
@@ -269,6 +269,85 @@ export class MeasurementChartComponent implements AfterViewInit {
           data: particles_5um_maxData,
           label: this.translationService.translate('form.particles_5um') + ' Max',
           borderColor: 'rgb(185, 28, 28)',
+          backgroundColor: 'transparent',
+          borderDash: [5, 5],
+          fill: false,
+          tension: 0,
+          pointRadius: 0,
+          borderWidth: 2,
+          segment: {
+            borderDash: [5, 5],
+          }
+        } as any,
+      ];
+    }
+
+    if (isLuminosityMeasurementType(type)) {
+      const currentLimits = this.limitsService.getLimitsForType(type);
+
+      const lumData = measurements.map((m: any) => m.luminosity);
+      const minData = measurements.map(() => currentLimits.min);
+      const maxData = measurements.map(() => currentLimits.max);
+      const ewi = this.resolveEwiPair(currentLimits.min, currentLimits.max, currentLimits.lclEwi, currentLimits.uclEwi);
+      const lclEwiData = measurements.map(() => ewi.lcl);
+      const uclEwiData = measurements.map(() => ewi.ucl);
+
+      return [
+        {
+          data: lumData,
+          label: this.translationService.translate('form.luminosity'),
+          borderColor: 'rgb(234, 179, 8)',
+          backgroundColor: 'rgba(234, 179, 8, 0.1)',
+          fill: true,
+          tension: 0.4,
+          borderWidth: 2,
+        } as any,
+        {
+          data: minData,
+          label: this.translationService.translate('form.luminosityMin'),
+          borderColor: 'rgb(251, 146, 60)',
+          backgroundColor: 'transparent',
+          borderDash: [5, 5],
+          fill: false,
+          tension: 0,
+          pointRadius: 0,
+          borderWidth: 2,
+          segment: {
+            borderDash: [5, 5],
+          }
+        } as any,
+        {
+          data: lclEwiData,
+          label: this.translationService.translate('form.luminosity') + ' LCL-EWI',
+          borderColor: 'rgb(245, 158, 11)',
+          backgroundColor: 'transparent',
+          borderDash: [2, 4],
+          fill: false,
+          tension: 0,
+          pointRadius: 0,
+          borderWidth: 2,
+          segment: {
+            borderDash: [2, 4],
+          }
+        } as any,
+        {
+          data: uclEwiData,
+          label: this.translationService.translate('form.luminosity') + ' UCL-EWI',
+          borderColor: 'rgb(217, 119, 6)',
+          backgroundColor: 'transparent',
+          borderDash: [2, 4],
+          fill: false,
+          tension: 0,
+          pointRadius: 0,
+          borderWidth: 2,
+          segment: {
+            borderDash: [2, 4],
+          }
+        } as any,
+        {
+          data: maxData,
+          label: this.translationService.translate('form.luminosityMax'),
+          borderColor: 'rgb(220, 38, 38)',
           backgroundColor: 'transparent',
           borderDash: [5, 5],
           fill: false,

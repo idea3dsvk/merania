@@ -6,7 +6,7 @@ import { ChartConfiguration, ChartType } from 'chart.js';
 import { DataService } from '../../services/data.service';
 import { TranslationService } from '../../services/translation.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
-import { MeasurementType, MEASUREMENT_TYPES, isDustinessMeasurementType } from '../../models';
+import { MeasurementType, MEASUREMENT_TYPES, isDustinessMeasurementType, isLuminosityMeasurementType } from '../../models';
 import { SpecificationsService } from '../../services/specifications.service';
 
 @Component({
@@ -141,6 +141,17 @@ export class TrendChartsComponent {
     const type = this.selectedType();
     const datasets: any[] = [];
 
+    if (isLuminosityMeasurementType(type)) {
+      datasets.push({
+        data: measurements.map(m => m.luminosity),
+        label: this.translationService.translate('form.luminosity'),
+        borderColor: 'rgb(255, 206, 86)',
+        backgroundColor: 'rgba(255, 206, 86, 0.1)',
+        tension: 0.4
+      });
+      return datasets;
+    }
+
     if (isDustinessMeasurementType(type)) {
       datasets.push({
         data: measurements.map(m => m.particles_0_5um),
@@ -173,16 +184,6 @@ export class TrendChartsComponent {
           label: this.translationService.translate('form.humidity'),
           borderColor: 'rgb(54, 162, 235)',
           backgroundColor: 'rgba(54, 162, 235, 0.1)',
-          tension: 0.4
-        });
-        break;
-
-      case 'luminosity':
-        datasets.push({
-          data: measurements.map(m => m.luminosity),
-          label: this.translationService.translate('form.luminosity'),
-          borderColor: 'rgb(255, 206, 86)',
-          backgroundColor: 'rgba(255, 206, 86, 0.1)',
           tension: 0.4
         });
         break;
@@ -251,7 +252,7 @@ export class TrendChartsComponent {
   }
 
   private isSupportedMeasurementType(type: string): boolean {
-    return MEASUREMENT_TYPES.includes(type as any) || isDustinessMeasurementType(type);
+    return MEASUREMENT_TYPES.includes(type as any) || isDustinessMeasurementType(type) || isLuminosityMeasurementType(type);
   }
 
   private buildTypeColors(count: number): { background: string[]; border: string[] } {

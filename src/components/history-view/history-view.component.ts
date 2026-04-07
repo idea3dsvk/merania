@@ -3,7 +3,7 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DataService } from '../../services/data.service';
 import { AuthService } from '../../services/auth.service';
-import { Measurement, MeasurementType, MEASUREMENT_TYPES, isDustinessMeasurement } from '../../models';
+import { Measurement, MeasurementType, MEASUREMENT_TYPES, isDustinessMeasurement, isLuminosityMeasurement } from '../../models';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { LocaleDatePipe } from '../../pipes/locale-date.pipe';
 import { LocaleNumberPipe } from '../../pipes/locale-number.pipe';
@@ -164,13 +164,15 @@ export class HistoryViewComponent {
   });
   
   private getPrimaryValue(m: Measurement): number {
+    if (isLuminosityMeasurement(m)) {
+      return m.luminosity;
+    }
     if (isDustinessMeasurement(m)) {
       return (m.particles_0_5um + m.particles_5um) / 2;
     }
 
     switch (m.type) {
         case 'temperature_humidity': return m.temperature;
-        case 'luminosity': return m.luminosity;
         case 'torque': return m.torqueValue;
         case 'surface_resistance': return m.resistance;
         case 'grounding_resistance': return m.resistance;

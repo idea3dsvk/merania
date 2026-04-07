@@ -4,7 +4,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
 import { TranslationService } from '../../services/translation.service';
 import { DataService } from '../../services/data.service';
 import { AuthService } from '../../services/auth.service';
-import { Measurement, TemperatureHumidityMeasurement, LuminosityMeasurement, TorqueMeasurement, SurfaceResistanceMeasurement, GroundingResistanceMeasurement, IonizerMeasurement } from '../../models';
+import { Measurement, TemperatureHumidityMeasurement, LuminosityMeasurement, TorqueMeasurement, SurfaceResistanceMeasurement, GroundingResistanceMeasurement, IonizerMeasurement, isLuminosityMeasurement } from '../../models';
 import * as XLSX from 'xlsx';
 
 @Component({
@@ -153,13 +153,15 @@ export class ImportExportComponent {
   }
 
   private getMeasurementValue(m: Measurement, field: string): string {
+    if (isLuminosityMeasurement(m)) {
+      if (field === 'luminosity') return m.luminosity.toString();
+      return '';
+    }
+
     switch (m.type) {
       case 'temperature_humidity':
         if (field === 'temperature') return (m as TemperatureHumidityMeasurement).temperature.toString();
         if (field === 'humidity') return (m as TemperatureHumidityMeasurement).humidity.toString();
-        break;
-      case 'luminosity':
-        if (field === 'luminosity') return (m as LuminosityMeasurement).luminosity.toString();
         break;
       case 'torque':
         if (field === 'torqueValue') return (m as TorqueMeasurement).torqueValue.toString();

@@ -1,5 +1,5 @@
 import { Injectable, signal, inject } from '@angular/core';
-import { Measurement, AuditLog, AuditAction, AuditEntityType, AuditChange } from '../models';
+import { Measurement, AuditLog, AuditAction, AuditEntityType, AuditChange, isLuminosityMeasurement } from '../models';
 import { TranslationService } from './translation.service';
 import { ToastService } from './toast.service';
 import { ErrorHandlerService } from './error-handler.service';
@@ -291,9 +291,11 @@ export class DataService {
             t(`measurementNames.${m.type}`),
             this.removeDiacritics(m.location)
         ];
+      if (isLuminosityMeasurement(m)) {
+        return [...base, this.removeDiacritics(`${t('pdf.detailsPrefix.lux')}: ${m.luminosity}lx (${m.limits.min}-${m.limits.max})`)];
+      }
         switch (m.type) {
             case 'temperature_humidity': return [...base, this.removeDiacritics(`${t('pdf.detailsPrefix.temp')}: ${m.temperature}deg (${m.limits.temperatureMin}-${m.limits.temperatureMax}), ${t('pdf.detailsPrefix.hum')}: ${m.humidity}% (${m.limits.humidityMin}-${m.limits.humidityMax})`)];
-            case 'luminosity': return [...base, this.removeDiacritics(`${t('pdf.detailsPrefix.lux')}: ${m.luminosity}lx (${m.limits.min}-${m.limits.max})`)];
             case 'dustiness_iso6': return [...base, this.removeDiacritics(`0.5u: ${m.particles_0_5um} (${m.limits.particles_0_5um_min}-${m.limits.particles_0_5um_max}), 5u: ${m.particles_5um} (${m.limits.particles_5um_min}-${m.limits.particles_5um_max})`)];
             case 'dustiness_iso5': return [...base, this.removeDiacritics(`0.5u: ${m.particles_0_5um} (${m.limits.particles_0_5um_min}-${m.limits.particles_0_5um_max}), 5u: ${m.particles_5um} (${m.limits.particles_5um_min}-${m.limits.particles_5um_max})`)];
             case 'torque': return [...base, this.removeDiacritics(`${t('pdf.detailsPrefix.id')}: ${m.screwdriverId}, ${t('pdf.detailsPrefix.val')}: ${m.torqueValue}Nm (${m.limits.min}-${m.limits.max})`)];

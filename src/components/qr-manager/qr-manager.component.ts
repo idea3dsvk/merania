@@ -5,7 +5,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
 import { TranslationService } from '../../services/translation.service';
 import { AuthService } from '../../services/auth.service';
 import { DataService } from '../../services/data.service';
-import { MeasurementType, MEASUREMENT_TYPES, isDustinessMeasurementType } from '../../models';
+import { MeasurementType, MEASUREMENT_TYPES, isDustinessMeasurementType, isLuminosityMeasurementType } from '../../models';
 import { SpecificationsService } from '../../services/specifications.service';
 import * as QRCode from 'qrcode';
 
@@ -276,6 +276,6 @@ export class QRManagerComponent implements OnInit {
   }
 
   private isSupportedMeasurementType(type: string): boolean {
-    return MEASUREMENT_TYPES.includes(type as any) || isDustinessMeasurementType(type);
+    return MEASUREMENT_TYPES.includes(type as any) || isDustinessMeasurementType(type) || isLuminosityMeasurementType(type);
   }
 }

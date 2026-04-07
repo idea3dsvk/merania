@@ -1,7 +1,7 @@
 import { Component, ChangeDetectionStrategy, input, output, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, ValidatorFn, AbstractControl, ValidationErrors } from '@angular/forms';
-import { MeasurementType, isDustinessMeasurementType } from '../../models';
+import { MeasurementType, isDustinessMeasurementType, isLuminosityMeasurementType } from '../../models';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { LimitsService } from '../../services/limits.service';
 import { TrapFocusDirective } from '../../directives/trap-focus.directive';
@@ -168,6 +168,22 @@ export class LimitsDialogComponent implements OnInit {
         break;
       }
       default: {
+        if (isLuminosityMeasurementType(measurementType)) {
+          const dynamicLuminosityEwi = this.resolveEwiPair(
+            currentLimits?.min ?? 500,
+            currentLimits?.max ?? 1000,
+            currentLimits?.lclEwi,
+            currentLimits?.uclEwi
+          );
+          this.form = this.fb.group({
+            min: [currentLimits?.min ?? 500, [Validators.required, Validators.min(0)]],
+            max: [currentLimits?.max ?? 1000, [Validators.required, Validators.min(0)]],
+            lclEwi: [dynamicLuminosityEwi.lcl, [Validators.required, Validators.min(0)]],
+            uclEwi: [dynamicLuminosityEwi.ucl, [Validators.required, Validators.min(0)]],
+          });
+          break;
+        }
+
         const defaultEwi = this.resolveEwiPair(
           currentLimits?.min ?? 0,
           currentLimits?.max ?? 100,
@@ -204,6 +220,10 @@ export class LimitsDialogComponent implements OnInit {
     return isDustinessMeasurementType(type);
   }
 
+  isLuminosityType(type: string): boolean {
+    return isLuminosityMeasurementType(type);
+  }
+
   private ewiRangeValidator(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       if (!(control instanceof FormGroup)) {
@@ -237,7 +257,7 @@ export class LimitsDialogComponent implements OnInit {
         addRangeError('particles_5um_min', 'particles_5um_max', 'particles_5um_lcl_ewi', 'particles_5um_ucl_ewi', 'particles5EwiInvalid');
       }
 
-      if (type === 'luminosity' || type === 'torque' || type === 'surface_resistance' || type === 'grounding_resistance') {
+      if (isLuminosityMeasurementType(type) || type === 'torque' || type === 'surface_resistance' || type === 'grounding_resistance') {
         addRangeError('min', 'max', 'lclEwi', 'uclEwi', 'genericEwiInvalid');
       }
 

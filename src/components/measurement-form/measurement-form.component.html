@@ -28,12 +28,6 @@
         </div>
       </div>
     }
-    @case ('luminosity') {
-      <div>
-        <label for="luminosity" class="block text-xs sm:text-sm font-medium text-gray-700">{{ 'form.luminosity' | translate }}</label>
-        <input type="number" id="luminosity" formControlName="luminosity" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
-      </div>
-    }
     @case ('dustiness_iso6') {
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
         <div>
@@ -59,6 +53,12 @@
       </div>
     }
     @default {
+      @if (isLuminosityType(measurementType())) {
+        <div>
+          <label for="luminosity" class="block text-xs sm:text-sm font-medium text-gray-700">{{ 'form.luminosity' | translate }}</label>
+          <input type="number" id="luminosity" formControlName="luminosity" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+        </div>
+      }
       @if (isDustinessType(measurementType())) {
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
           <div>

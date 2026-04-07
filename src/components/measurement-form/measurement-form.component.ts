@@ -1,7 +1,7 @@
 import { Component, ChangeDetectionStrategy, input, output, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { MeasurementType, Measurement, isDustinessMeasurement, isDustinessMeasurementType } from '../../models';
+import { MeasurementType, Measurement, isDustinessMeasurement, isDustinessMeasurementType, isLuminosityMeasurement, isLuminosityMeasurementType } from '../../models';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { LimitsService } from '../../services/limits.service';
 
@@ -54,7 +54,7 @@ export class MeasurementFormComponent implements OnInit {
           temperature: existing.temperature,
           humidity: existing.humidity,
         });
-      } else if (existing.type === 'luminosity') {
+      } else if (isLuminosityMeasurement(existing)) {
         this.form.patchValue({
           luminosity: existing.luminosity,
         });
@@ -116,6 +116,13 @@ export class MeasurementFormComponent implements OnInit {
           temperature: [null, [Validators.required, Validators.min(-50), Validators.max(100)]],
           humidity: [null, [Validators.required, Validators.min(0), Validators.max(100)]],
         };
+        break;
+      default:
+        if (isLuminosityMeasurementType(type)) {
+          specificControls = {
+            luminosity: [null, [Validators.required, Validators.min(0)]],
+          };
+        }
         break;
       case 'luminosity':
         specificControls = {
@@ -198,7 +205,7 @@ export class MeasurementFormComponent implements OnInit {
           particles_5um_min: limits.particles_5um_min,
           particles_5um_max: limits.particles_5um_max
         };
-      } else if (type === 'luminosity' || type === 'torque' || 
+      } else if (isLuminosityMeasurementType(type) || type === 'torque' || 
                  type === 'surface_resistance' || type === 'grounding_resistance') {
         // For types with min/max limits
         const { date, location, notes, ...specificData } = formValue;
@@ -217,5 +224,9 @@ export class MeasurementFormComponent implements OnInit {
 
   isDustinessType(type: string): boolean {
     return isDustinessMeasurementType(type);
+  }
+
+  isLuminosityType(type: string): boolean {
+    return isLuminosityMeasurementType(type);
   }
 }

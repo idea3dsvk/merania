@@ -1,6 +1,6 @@
 import { Injectable, inject, computed } from '@angular/core';
 import { DataService } from './data.service';
-import { Measurement, MeasurementType, isDustinessMeasurement } from '../models';
+import { Measurement, MeasurementType, isDustinessMeasurement, isLuminosityMeasurement } from '../models';
 
 export interface StatisticsData {
   totalMeasurements: number;
@@ -64,6 +64,9 @@ export class StatisticsService {
   });
 
   private isOutOfSpec(m: Measurement): boolean {
+    if (isLuminosityMeasurement(m)) {
+      return m.luminosity < m.limits.min || m.luminosity > m.limits.max;
+    }
     if (isDustinessMeasurement(m)) {
       return m.particles_0_5um < m.limits.particles_0_5um_min || m.particles_0_5um > m.limits.particles_0_5um_max ||
              m.particles_5um < m.limits.particles_5um_min || m.particles_5um > m.limits.particles_5um_max;
@@ -73,8 +76,6 @@ export class StatisticsService {
       case 'temperature_humidity':
         return m.temperature < m.limits.temperatureMin || m.temperature > m.limits.temperatureMax ||
                m.humidity < m.limits.humidityMin || m.humidity > m.limits.humidityMax;
-      case 'luminosity':
-        return m.luminosity < m.limits.min || m.luminosity > m.limits.max;
       case 'torque':
         return m.torqueValue < m.limits.min || m.torqueValue > m.limits.max;
       case 'surface_resistance':
@@ -96,15 +97,15 @@ export class StatisticsService {
     
     for (const m of measurements) {
       let value = 0;
+      if (isLuminosityMeasurement(m)) {
+        value = m.luminosity;
+      } else
       if (isDustinessMeasurement(m)) {
         value = (m.particles_0_5um + m.particles_5um) / 2;
       } else {
       switch (m.type) {
         case 'temperature_humidity':
           value = m.temperature;
-          break;
-        case 'luminosity':
-          value = m.luminosity;
           break;
         case 'torque':
           value = m.torqueValue;
@@ -192,6 +193,10 @@ export class StatisticsService {
     
     let sum = 0;
     for (const m of measurements) {
+      if (isLuminosityMeasurement(m)) {
+        sum += m.luminosity;
+        continue;
+      }
       if (isDustinessMeasurement(m)) {
         sum += (m.particles_0_5um + m.particles_5um) / 2;
         continue;
@@ -200,9 +205,6 @@ export class StatisticsService {
       switch (m.type) {
         case 'temperature_humidity':
           sum += m.temperature;
-          break;
-        case 'luminosity':
-          sum += m.luminosity;
           break;
         case 'torque':
           sum += m.torqueValue;

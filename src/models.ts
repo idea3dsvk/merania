@@ -11,7 +11,9 @@ export const MEASUREMENT_TYPE_VALUES = [
 
 export type KnownMeasurementType = (typeof MEASUREMENT_TYPE_VALUES)[number];
 export type DustinessMeasurementType = `dustiness_iso${number}`;
-export type MeasurementType = KnownMeasurementType | DustinessMeasurementType;
+export type DynamicLuminosityMeasurementType = `luminosity_${string}`;
+export type LuminosityMeasurementType = 'luminosity' | DynamicLuminosityMeasurementType;
+export type MeasurementType = KnownMeasurementType | DustinessMeasurementType | DynamicLuminosityMeasurementType;
 
 export const MEASUREMENT_TYPES: KnownMeasurementType[] = [...MEASUREMENT_TYPE_VALUES];
 
@@ -19,6 +21,10 @@ export type SpecificationType = MeasurementType | (string & {});
 
 export function isDustinessMeasurementType(type: string): type is DustinessMeasurementType {
   return /^dustiness_iso\d+$/.test(type);
+}
+
+export function isLuminosityMeasurementType(type: string): type is LuminosityMeasurementType {
+  return type === 'luminosity' || /^luminosity_[a-z0-9_]+$/.test(type);
 }
 
 export interface BaseMeasurement {
@@ -43,7 +49,7 @@ export interface TemperatureHumidityMeasurement extends BaseMeasurement {
 }
 
 export interface LuminosityMeasurement extends BaseMeasurement {
-  type: 'luminosity';
+  type: LuminosityMeasurementType;
   luminosity: number; // Lux
   limits: {
     min: number;
@@ -106,6 +112,10 @@ export type Measurement = TemperatureHumidityMeasurement | LuminosityMeasurement
 
 export function isDustinessMeasurement(measurement: Measurement): measurement is DustinessMeasurement {
   return isDustinessMeasurementType(measurement.type);
+}
+
+export function isLuminosityMeasurement(measurement: Measurement): measurement is LuminosityMeasurement {
+  return isLuminosityMeasurementType(measurement.type);
 }
 
 // ISO Standards and Specifications

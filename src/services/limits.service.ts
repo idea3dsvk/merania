@@ -1,5 +1,5 @@
 import { Injectable, signal, inject } from '@angular/core';
-import { MeasurementType, isDustinessMeasurementType } from '../models';
+import { MeasurementType, isDustinessMeasurementType, isLuminosityMeasurementType } from '../models';
 import { FirebaseService } from './firebase.service';
 
 export interface MeasurementLimits {
@@ -322,6 +322,9 @@ export class LimitsService {
           balanceUclEwi: 21,
         };
       default:
+        if (isLuminosityMeasurementType(type)) {
+          return { min: 500, max: 1000, lclEwi: 600, uclEwi: 900 };
+        }
         return { min: 0, max: 100, lclEwi: 20, uclEwi: 80 };
     }
   }
