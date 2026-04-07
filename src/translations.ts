@@ -141,6 +141,8 @@ export const translations = {
     },
     // measurement types
     measurementNames: {
+      temperature: 'Temperature',
+      humidity: 'Humidity',
       temperature_humidity: 'Temperature & Humidity',
       luminosity: 'Luminosity',
       dustiness_iso6: 'Dustiness ISO6',
@@ -470,6 +472,8 @@ export const translations = {
       save: 'Uložiť záznam',
     },
     measurementNames: {
+      temperature: 'Teplota',
+      humidity: 'Vlhkost',
       temperature_humidity: 'Teplota a vlhkosť',
       luminosity: 'Svietivosť',
       dustiness_iso6: 'Prašnosť ISO6',
@@ -797,6 +801,8 @@ export const translations = {
       save: 'Eintrag speichern',
     },
     measurementNames: {
+      temperature: 'Temperatur',
+      humidity: 'Luftfeuchtigkeit',
       temperature_humidity: 'Temperatur & Feuchtigkeit',
       luminosity: 'Leuchtdichte',
       dustiness_iso6: 'Staubbelastung ISO6',

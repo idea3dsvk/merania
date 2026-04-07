@@ -14,6 +14,7 @@ import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.compone
 import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 
 type MeasurementWithTrend = Measurement & { trend?: 'up' | 'down' | 'stable' };
+type HistoryChartType = MeasurementType | 'temperature' | 'humidity';
 @Component({
   selector: 'app-history-view',
   templateUrl: './history-view.component.html',
@@ -62,6 +63,22 @@ export class HistoryViewComponent {
   measurementTypes = computed<MeasurementType[]>(() => {
     const fromData = this.dataService.measurements().map(m => m.type);
     return Array.from(new Set([...(MEASUREMENT_TYPES as MeasurementType[]), ...fromData]));
+  });
+
+  displayChartTypes = computed<HistoryChartType[]>(() => {
+    const selectedType = this.filterType();
+
+    if (selectedType === 'all') {
+      return this.measurementTypes().flatMap((type): HistoryChartType[] =>
+        type === 'temperature_humidity' ? ['temperature', 'humidity'] : [type]
+      );
+    }
+
+    if (selectedType === 'temperature_humidity') {
+      return ['temperature', 'humidity'];
+    }
+
+    return [selectedType];
   });
   
   allLocations = computed(() => {

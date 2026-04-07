@@ -1,23 +1,13 @@
 <div class="space-y-6">
   <!-- Charts Section -->
-  @if (filterType() !== 'all') {
-    <div class="grid grid-cols-1 gap-6">
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    @for (type of displayChartTypes(); track type) {
       <app-measurement-chart 
         [measurements]="filteredMeasurements()"
-        [measurementType]="filterType()"
+        [measurementType]="type"
       />
-    </div>
-  } @else {
-    <!-- Show all charts when 'all' is selected -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      @for (type of measurementTypes(); track type) {
-        <app-measurement-chart 
-          [measurements]="filteredMeasurements()"
-          [measurementType]="type"
-        />
-      }
-    </div>
-  }
+    }
+  </div>
 
   <!-- Filters and Actions -->
   <div class="bg-white p-4 sm:p-6 rounded-lg shadow-md">

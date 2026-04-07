@@ -6,6 +6,8 @@ import { Measurement, MeasurementType, isDustinessMeasurementType } from '../../
 import { TranslationService } from '../../services/translation.service';
 import { LimitsService } from '../../services/limits.service';
 
+type ChartMeasurementType = MeasurementType | 'temperature' | 'humidity';
+
 @Component({
   selector: 'app-measurement-chart',
   templateUrl: './measurement-chart.component.html',
@@ -16,7 +18,7 @@ export class MeasurementChartComponent implements AfterViewInit {
   @ViewChild(BaseChartDirective) chart?: BaseChartDirective;
   
   measurements = input.required<Measurement[]>();
-  measurementType = input.required<MeasurementType>();
+  measurementType = input.required<ChartMeasurementType>();
   
   private translationService = inject(TranslationService);
   private limitsService = inject(LimitsService);
@@ -25,7 +27,13 @@ export class MeasurementChartComponent implements AfterViewInit {
 
   // Chart data computed based on measurements
   public chartData = computed<ChartConfiguration['data']>(() => {
-    const filtered = this.measurements().filter(m => m.type === this.measurementType());
+    const selectedType = this.measurementType();
+    const filtered = this.measurements().filter(m => {
+      if (selectedType === 'temperature' || selectedType === 'humidity') {
+        return m.type === 'temperature_humidity';
+      }
+      return m.type === selectedType;
+    });
     
     // Track limits changes to recompute datasets
     this.limitsService.limits();
@@ -275,6 +283,148 @@ export class MeasurementChartComponent implements AfterViewInit {
     }
     
     switch (type as string) {
+      case 'temperature': {
+        const currentLimits = this.limitsService.getLimitsForType('temperature_humidity');
+        const tempData = measurements.map((m: any) => m.temperature);
+        const tempMinData = measurements.map(() => currentLimits.temperatureMin);
+        const tempMaxData = measurements.map(() => currentLimits.temperatureMax);
+        const tempEwi = this.resolveEwiPair(
+          currentLimits.temperatureMin,
+          currentLimits.temperatureMax,
+          currentLimits.temperatureLclEwi,
+          currentLimits.temperatureUclEwi
+        );
+        const tempLclEwiData = measurements.map(() => tempEwi.lcl);
+        const tempUclEwiData = measurements.map(() => tempEwi.ucl);
+
+        return [
+          {
+            data: tempData,
+            label: this.translationService.translate('form.temperature'),
+            borderColor: 'rgb(239, 68, 68)',
+            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+            fill: true,
+            tension: 0.4,
+            borderWidth: 2,
+          },
+          {
+            data: tempMinData,
+            label: this.translationService.translate('form.temperatureMin'),
+            borderColor: 'rgb(251, 146, 60)',
+            backgroundColor: 'transparent',
+            borderDash: [5, 5],
+            fill: false,
+            tension: 0,
+            pointRadius: 0,
+            borderWidth: 3,
+          },
+          {
+            data: tempLclEwiData,
+            label: this.translationService.translate('form.temperature') + ' LCL-EWI',
+            borderColor: 'rgb(245, 158, 11)',
+            backgroundColor: 'transparent',
+            borderDash: [2, 4],
+            fill: false,
+            tension: 0,
+            pointRadius: 0,
+            borderWidth: 2,
+          },
+          {
+            data: tempUclEwiData,
+            label: this.translationService.translate('form.temperature') + ' UCL-EWI',
+            borderColor: 'rgb(217, 119, 6)',
+            backgroundColor: 'transparent',
+            borderDash: [2, 4],
+            fill: false,
+            tension: 0,
+            pointRadius: 0,
+            borderWidth: 2,
+          },
+          {
+            data: tempMaxData,
+            label: this.translationService.translate('form.temperatureMax'),
+            borderColor: 'rgb(220, 38, 38)',
+            backgroundColor: 'transparent',
+            borderDash: [5, 5],
+            fill: false,
+            tension: 0,
+            pointRadius: 0,
+            borderWidth: 3,
+          },
+        ];
+      }
+
+      case 'humidity': {
+        const currentLimits = this.limitsService.getLimitsForType('temperature_humidity');
+        const humData = measurements.map((m: any) => m.humidity);
+        const humMinData = measurements.map(() => currentLimits.humidityMin);
+        const humMaxData = measurements.map(() => currentLimits.humidityMax);
+        const humEwi = this.resolveEwiPair(
+          currentLimits.humidityMin,
+          currentLimits.humidityMax,
+          currentLimits.humidityLclEwi,
+          currentLimits.humidityUclEwi
+        );
+        const humLclEwiData = measurements.map(() => humEwi.lcl);
+        const humUclEwiData = measurements.map(() => humEwi.ucl);
+
+        return [
+          {
+            data: humData,
+            label: this.translationService.translate('form.humidity'),
+            borderColor: 'rgb(6, 182, 212)',
+            backgroundColor: 'rgba(6, 182, 212, 0.1)',
+            fill: true,
+            tension: 0.4,
+            borderWidth: 2,
+          },
+          {
+            data: humMinData,
+            label: this.translationService.translate('form.humidityMin'),
+            borderColor: 'rgb(34, 211, 238)',
+            backgroundColor: 'transparent',
+            borderDash: [5, 5],
+            fill: false,
+            tension: 0,
+            pointRadius: 0,
+            borderWidth: 3,
+          },
+          {
+            data: humLclEwiData,
+            label: this.translationService.translate('form.humidity') + ' LCL-EWI',
+            borderColor: 'rgb(6, 182, 212)',
+            backgroundColor: 'transparent',
+            borderDash: [2, 4],
+            fill: false,
+            tension: 0,
+            pointRadius: 0,
+            borderWidth: 2,
+          },
+          {
+            data: humUclEwiData,
+            label: this.translationService.translate('form.humidity') + ' UCL-EWI',
+            borderColor: 'rgb(14, 116, 144)',
+            backgroundColor: 'transparent',
+            borderDash: [2, 4],
+            fill: false,
+            tension: 0,
+            pointRadius: 0,
+            borderWidth: 2,
+          },
+          {
+            data: humMaxData,
+            label: this.translationService.translate('form.humidityMax'),
+            borderColor: 'rgb(8, 145, 178)',
+            backgroundColor: 'transparent',
+            borderDash: [5, 5],
+            fill: false,
+            tension: 0,
+            pointRadius: 0,
+            borderWidth: 3,
+          },
+        ];
+      }
+
       case 'temperature_humidity': {
         // Get current limits from service
         const currentLimits = this.limitsService.getLimitsForType('temperature_humidity');
@@ -1194,7 +1344,14 @@ export class MeasurementChartComponent implements AfterViewInit {
     }
   }
 
-  getMeasurementTypeName(type: MeasurementType): string {
+  getMeasurementTypeName(type: ChartMeasurementType): string {
+    if (type === 'temperature') {
+      return this.translationService.translate('form.temperature');
+    }
+    if (type === 'humidity') {
+      return this.translationService.translate('form.humidity');
+    }
+
     const key = `measurementNames.${type}`;
     const translated = this.translationService.translate(key);
     if (translated !== key) {
