@@ -124,6 +124,10 @@
                     0.5µm: {{ item.particles_0_5um | localeNumber:0 }} ({{item.limits.particles_0_5um_min | localeNumber:0}}-{{item.limits.particles_0_5um_max | localeNumber:0}}), 
                     5µm: {{ item.particles_5um | localeNumber:0 }} ({{item.limits.particles_5um_min | localeNumber:0}}-{{item.limits.particles_5um_max | localeNumber:0}})
                   }
+                  @case ('dustiness_iso8') { 
+                    0.5µm: {{ item.particles_0_5um | localeNumber:0 }} ({{item.limits.particles_0_5um_min | localeNumber:0}}-{{item.limits.particles_0_5um_max | localeNumber:0}}), 
+                    5µm: {{ item.particles_5um | localeNumber:0 }} ({{item.limits.particles_5um_min | localeNumber:0}}-{{item.limits.particles_5um_max | localeNumber:0}})
+                  }
                   @case ('torque') { {{ 'history.detailsPrefix.val' | translate }}: {{ item.torqueValue | localeNumber:1 }}Nm@if(item.limit){, {{ 'history.detailsPrefix.limit' | translate }}: {{item.limit | localeNumber:1}}Nm} }
                   @case ('surface_resistance') { {{ 'history.detailsPrefix.r' | translate }}: {{ item.resistance?.toExponential(1) || 'N/A' }}Ω@if(item.limit){, {{ 'history.detailsPrefix.limit' | translate }}: {{item.limit.toExponential(1)}}Ω} }
                   @case ('grounding_resistance') { {{ 'history.detailsPrefix.r' | translate }}: {{ item.resistance | localeNumber:2 }}Ω@if(item.limit){, {{ 'history.detailsPrefix.limit' | translate }}: {{item.limit | localeNumber:2}}Ω} }
